@@ -13,6 +13,8 @@ export class GameMap {
     level_before: Direction[][]
     changing_rails_directions: Direction[][][]
     changing_rails_pos: number[][]
+    houses_id:number[][]=[]
+    houses_length:number=0
     spawner_x: number = 0
     spawner_y: number = 0
     width: number = 0
@@ -28,7 +30,8 @@ export class GameMap {
         // with this we will render the rails and play with it
         this.changing_rails_directions = level_design.map(row => row.map(() => []))
         this.changing_rails_pos = level_design.map(row => row.map(() => 0))
-
+        // the houses id
+        this.houses_id=level_design.map(row => row.map(() => -1))
         // x y height
         this.width = level_design[0].length
         this.height = level_design.length
@@ -165,6 +168,8 @@ export class GameMap {
 
         const elementType = this.level_design[y][x]
         if (elementType == Kind.HOUSE) {
+            this.houses_id[y][x]=this.houses_length
+            this.houses_length++
             return
         }
         if (elementType === Kind.SPAWNER) {
@@ -194,6 +199,12 @@ export class GameMap {
             }
             return
         }
+    }
+    CheckHouse(x: number, y: number){
+        return this.houses_id[Math.floor(y)][Math.floor(x)]
+    }
+    GetHousesLength(){
+        return this.houses_length
     }
     UpdateChangingRails(x: number, y: number) {
         if (this.GetPoint(x, y) !== Kind.CHANGING_RAIL) {

@@ -20,6 +20,8 @@
       ];
       // y x 
       this.spawners = [];
+      this.houses_id = [];
+      this.houses_length = 0;
       this.spawner_x = 0;
       this.spawner_y = 0;
       this.width = 0;
@@ -31,6 +33,7 @@
       this.level_before = level_design.map((row) => row.map(() => 0 /* NEUTRAL */));
       this.changing_rails_directions = level_design.map((row) => row.map(() => []));
       this.changing_rails_pos = level_design.map((row) => row.map(() => 0));
+      this.houses_id = level_design.map((row) => row.map(() => -1));
       this.width = level_design[0].length;
       this.height = level_design.length;
       this.SetupMap();
@@ -145,6 +148,8 @@
       this.level_before[y][x] = before;
       const elementType = this.level_design[y][x];
       if (elementType == 1 /* HOUSE */) {
+        this.houses_id[y][x] = this.houses_length;
+        this.houses_length++;
         return;
       }
       if (elementType === 4 /* SPAWNER */) {
@@ -168,6 +173,12 @@
         }
         return;
       }
+    }
+    CheckHouse(x, y) {
+      return this.houses_id[Math.floor(y)][Math.floor(x)];
+    }
+    GetHousesLength() {
+      return this.houses_length;
     }
     UpdateChangingRails(x, y) {
       if (this.GetPoint(x, y) !== 3 /* CHANGING_RAIL */) {
@@ -212,7 +223,7 @@
 
   // src/typescript/src/train.ts
   var Train = class {
-    constructor(x, y, map) {
+    constructor(x, y, map, house_id) {
       this.x = 0;
       this.y = 0;
       // con esto lo preprao para eliminarlo
@@ -223,10 +234,13 @@
       // per second that means 1000 milliseconds
       this.initialVelocity = 0.5;
       this.velocity = this.initialVelocity / 1e3;
+      this.house_id = -1;
+      this.is_correct = false;
       this.rotatingDirection = 0 /* NEUTRAL */;
       this.length = map.GetLength() / 2;
       this.y = y + 0.5;
       this.x = x + 0.5;
+      this.house_id = house_id;
     }
     resize(length) {
       this.length = length / 2;
@@ -245,46 +259,32 @@
       next = this.rotatingDirection;
       if (before !== next && before !== 0 /* NEUTRAL */) {
         console.log(this.printDirection(before), this.printDirection(next));
-        const vector = 0.70710678118;
-        const to_go_UP = -vector;
-        const to_go_DOWN = vector;
-        const to_go_LEFT = -vector;
-        const to_go_RIGHT = vector;
+        const vector = Math.SQRT1_2;
+        const [to_go_UP, to_go_DOWN, to_go_LEFT, to_go_RIGHT] = [-vector, vector, -vector, vector];
         switch (true) {
           // viene de abajo va hacia arriba
           case (before === 4 /* DOWN */ && next === 1 /* LEFT */):
-          //    [dx, dy] = [to_go_LEFT, to_go_UP]
-          //    break
-          //// viene de al lado va hacia abajo
           case (before === 1 /* LEFT */ && next === 4 /* DOWN */):
             [dx, dy] = [to_go_LEFT, to_go_UP];
             break;
           // viene de al lado va hacia arriba
           case (before === 1 /* LEFT */ && next === 3 /* UP */):
-          //    [dx, dy] = [to_go_LEFT, to_go_DOWN]
-          //    break
-          ////viene de arriba va hacia abajo
           case (before === 3 /* UP */ && next === 1 /* LEFT */):
             [dx, dy] = [to_go_LEFT, to_go_DOWN];
             break;
           // viene de abajo va hacia arriba 
           case (before === 4 /* DOWN */ && next === 2 /* RIGHT */):
-          //    [dx, dy] = [to_go_RIGHT, to_go_UP]
-          //    break
-          //// viene de al lado va hacia abajo
           case (before === 2 /* RIGHT */ && next === 4 /* DOWN */):
             [dx, dy] = [to_go_RIGHT, to_go_UP];
             break;
           // viene de arriba va hacia al abajo
           case (before === 3 /* UP */ && next === 2 /* RIGHT */):
-          //    [dx, dy] = [to_go_RIGHT, to_go_DOWN]
-          //    break
-          //// viene de al lado va hacia arriba
           case (before === 2 /* RIGHT */ && next === 3 /* UP */):
             [dx, dy] = [to_go_RIGHT, to_go_DOWN];
             break;
           default:
             [dx, dy] = this.getNextPosition(next);
+            break;
         }
       } else {
         [dx, dy] = this.getNextPosition(next);
@@ -333,6 +333,7 @@
         ctx2.fillRect(this.x * map.length, this.y * map.length, 10, 10);
         return;
       }
+      this.is_correct = map.CheckHouse(this.x, this.y) === this.house_id;
       this.ready = true;
     }
     // entonces como puedo definir hacia donde he de ir? hmmmm
@@ -343,6 +344,32 @@
   };
 
   // src/typescript/src/game.ts
+  function string2Map(map) {
+    return map.split("\n").map((line) => line.split("").map((char) => {
+      switch (char) {
+        case "H":
+          return 1 /* HOUSE */;
+        case "C":
+          return 3 /* CHANGING_RAIL */;
+        case "R":
+          return 2 /* RAIL */;
+        case "S":
+          return 4 /* SPAWNER */;
+        default:
+          return 0 /* EMPTY */;
+      }
+    }));
+  }
+  var map_string = [
+    "-----------",
+    "--H--H-----",
+    "--R--R-----",
+    "--CRRCRRS--",
+    "--R--------",
+    "--R--------",
+    "--H--------",
+    "-----------"
+  ].join("\n");
   var Game = class {
     constructor() {
       this.state = 1;
@@ -353,33 +380,15 @@
       // tiempo mínimo entre frames en ms
       this.spawnTrainTime = 1e3;
       this.spawnTrainTimelapse = this.spawnTrainTime;
-      this.gameMap = new GameMap([
-        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */],
-        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */],
-        [0 /* EMPTY */, 1 /* HOUSE */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 1 /* HOUSE */, 0 /* EMPTY */, 0 /* EMPTY */],
-        [1 /* HOUSE */, 3 /* CHANGING_RAIL */, 2 /* RAIL */, 3 /* CHANGING_RAIL */, 2 /* RAIL */, 3 /* CHANGING_RAIL */, 1 /* HOUSE */, 0 /* EMPTY */],
-        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 2 /* RAIL */, 0 /* EMPTY */, 1 /* HOUSE */, 0 /* EMPTY */, 0 /* EMPTY */],
-        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 2 /* RAIL */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */],
-        [0 /* EMPTY */, 1 /* HOUSE */, 2 /* RAIL */, 3 /* CHANGING_RAIL */, 2 /* RAIL */, 2 /* RAIL */, 1 /* HOUSE */, 0 /* EMPTY */],
-        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 2 /* RAIL */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */],
-        [0 /* EMPTY */, 2 /* RAIL */, 2 /* RAIL */, 3 /* CHANGING_RAIL */, 2 /* RAIL */, 3 /* CHANGING_RAIL */, 4 /* SPAWNER */, 0 /* EMPTY */],
-        [0 /* EMPTY */, 1 /* HOUSE */, 0 /* EMPTY */, 2 /* RAIL */, 0 /* EMPTY */, 1 /* HOUSE */, 0 /* EMPTY */, 0 /* EMPTY */],
-        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 2 /* RAIL */, 0 /* EMPTY */, 1 /* HOUSE */, 0 /* EMPTY */, 0 /* EMPTY */],
-        [0 /* EMPTY */, 1 /* HOUSE */, 2 /* RAIL */, 3 /* CHANGING_RAIL */, 2 /* RAIL */, 3 /* CHANGING_RAIL */, 1 /* HOUSE */, 0 /* EMPTY */],
-        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 2 /* RAIL */, 0 /* EMPTY */, 0 /* EMPTY */],
-        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 1 /* HOUSE */, 0 /* EMPTY */, 2 /* RAIL */, 0 /* EMPTY */, 0 /* EMPTY */],
-        [0 /* EMPTY */, 1 /* HOUSE */, 2 /* RAIL */, 3 /* CHANGING_RAIL */, 2 /* RAIL */, 3 /* CHANGING_RAIL */, 1 /* HOUSE */, 0 /* EMPTY */],
-        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 2 /* RAIL */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */],
-        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 1 /* HOUSE */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */],
-        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */],
-        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */]
-      ]);
+      this.correct_trains = 0;
+      this.total_trains = 0;
+      this.gameMap = new GameMap(string2Map(map_string));
     }
     spawnTrain() {
       const spawners = this.gameMap.spawners;
       const random = Math.random() * spawners.length;
       const spawner = spawners[Math.floor(random)];
-      const train = new Train(spawner[1], spawner[0], this.gameMap);
+      const train = new Train(spawner[1], spawner[0], this.gameMap, Math.floor(Math.random() * this.gameMap.GetHousesLength()));
       this.trains.push(train);
       console.log("TODO train spawn");
     }
@@ -388,17 +397,26 @@
         this.spawnTrain();
       }
     }
-    draw(canvas2, ctx2) {
+    async draw(canvas2, ctx2) {
       const currentTime = performance.now();
       const deltaTime = currentTime - this.lastFrameTime;
       this.spawnTrainTimelapse -= deltaTime;
+      if (this.spawnTrainTimelapse <= 0) {
+        console.log("TODO: spawn trains every few seconds");
+      }
       if (deltaTime >= this.frameDelay) {
         this.trains.forEach((train) => {
           train.changeSpeed(deltaTime);
         });
         ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
         this.gameMap.Draw(canvas2, ctx2);
-        this.trains = this.trains.filter((train) => !train.ready);
+        this.trains = this.trains.filter((train) => {
+          this.total_trains++;
+          if (!train.is_correct) {
+            this.correct_trains++;
+          }
+          return !train.ready;
+        });
         this.trains.forEach((train) => {
           train.Draw(this.gameMap, ctx2);
         });

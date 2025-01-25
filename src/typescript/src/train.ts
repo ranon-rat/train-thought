@@ -12,11 +12,15 @@ export class Train {
     initialVelocity: number = 0.5
     velocity: number = this.initialVelocity / 1000
 
+    house_id: number = -1
+    is_correct: boolean = false
+
     rotatingDirection: Direction = Direction.NEUTRAL
-    constructor(x: number, y: number, map: GameMap) {
+    constructor(x: number, y: number, map: GameMap, house_id: number) {
         this.length = map.GetLength() / 2
         this.y = (y + 0.5)
         this.x = (x + 0.5)
+        this.house_id = house_id
     }
 
     resize(length: number) {
@@ -37,47 +41,33 @@ export class Train {
 
         if (before !== next && before !== Direction.NEUTRAL) {
             console.log(this.printDirection(before), this.printDirection(next));
-            const vector = 0.70710678118
-            const to_go_UP = -vector
-            const to_go_DOWN = vector
-            const to_go_LEFT = -vector
-            const to_go_RIGHT = vector
+            const vector = Math.SQRT1_2
+            const [to_go_UP,to_go_DOWN,to_go_LEFT,to_go_RIGHT]=[-vector,vector,-vector,vector]
             switch (true) {
                 // viene de abajo va hacia arriba
                 case (before === Direction.DOWN && next === Direction.LEFT):
-                //    [dx, dy] = [to_go_LEFT, to_go_UP]
-                //    break
-                //// viene de al lado va hacia abajo
                 case (before === Direction.LEFT && next === Direction.DOWN):
                     [dx, dy] = [to_go_LEFT, to_go_UP]
                     break
                 // viene de al lado va hacia arriba
                 case (before === Direction.LEFT && next === Direction.UP):
-                //    [dx, dy] = [to_go_LEFT, to_go_DOWN]
-                //    break
-                ////viene de arriba va hacia abajo
                 case (before === Direction.UP && next === Direction.LEFT):
                     [dx, dy] = [to_go_LEFT, to_go_DOWN]
                     break
                 // viene de abajo va hacia arriba 
                 case (before === Direction.DOWN && next === Direction.RIGHT):
-                //    [dx, dy] = [to_go_RIGHT, to_go_UP]
-                //    break
-                //// viene de al lado va hacia abajo
                 case (before === Direction.RIGHT && next === Direction.DOWN):
                     [dx, dy] = [to_go_RIGHT, to_go_UP]
                     break
                 // viene de arriba va hacia al abajo
                 case (before === Direction.UP && next === Direction.RIGHT):
-                //    [dx, dy] = [to_go_RIGHT, to_go_DOWN]
-                //    break
-                //// viene de al lado va hacia arriba
                 case (before === Direction.RIGHT && next === Direction.UP): // okay this is ready
                     [dx, dy] = [to_go_RIGHT, to_go_DOWN]
                     break
 
                 default:
                     [dx, dy] = this.getNextPosition(next)
+                    break
             }
         } else {
             // Movimiento en línea recta
@@ -123,6 +113,7 @@ export class Train {
             ctx.fillRect(this.x * map.length, this.y * map.length, 10, 10)
             return
         }
+        this.is_correct = map.CheckHouse(this.x, this.y) === this.house_id
         this.ready = true
 
     }
