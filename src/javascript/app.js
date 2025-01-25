@@ -214,9 +214,21 @@
       return this.level_design[Math.floor(y)][Math.floor(x)];
     }
     GetDirection(x, y) {
+      if (y >= this.level_design.length || y < 0) {
+        return 0 /* NEUTRAL */;
+      }
+      if (x >= this.level_design[0].length || x < 0) {
+        return 0 /* NEUTRAL */;
+      }
       return this.level_directions[Math.floor(y)][Math.floor(x)];
     }
     GetBefore(x, y) {
+      if (y >= this.level_design.length || y < 0) {
+        return 0 /* NEUTRAL */;
+      }
+      if (x >= this.level_design[0].length || x < 0) {
+        return 0 /* NEUTRAL */;
+      }
       return this.level_before[Math.floor(y)][Math.floor(x)];
     }
   };
@@ -258,7 +270,6 @@
       }
       next = this.rotatingDirection;
       if (before !== next && before !== 0 /* NEUTRAL */) {
-        console.log(this.printDirection(before), this.printDirection(next));
         const vector = Math.SQRT1_2;
         const [to_go_UP, to_go_DOWN, to_go_LEFT, to_go_RIGHT] = [-vector, vector, -vector, vector];
         switch (true) {
@@ -361,14 +372,16 @@
     }));
   }
   var map_string = [
-    "-----------",
-    "--H--H-----",
-    "--R--R-----",
-    "--CRRCRRS--",
-    "--R--------",
-    "--R--------",
-    "--H--------",
-    "-----------"
+    "----------------------",
+    "--H------H------------",
+    "--R------R------------",
+    "--CRRRRRRCRRS---------",
+    "--R-------------------",
+    "--R-------------------",
+    "--R-------------------",
+    "--R-------------------",
+    "--H-------------------",
+    "----------------------"
   ].join("\n");
   var Game = class {
     constructor() {
@@ -378,7 +391,7 @@
       this.FPS = 60;
       this.frameDelay = 1e3 / 60;
       // tiempo mínimo entre frames en ms
-      this.spawnTrainTime = 1e3;
+      this.spawnTrainTime = 1e4;
       this.spawnTrainTimelapse = this.spawnTrainTime;
       this.correct_trains = 0;
       this.total_trains = 0;
@@ -403,6 +416,7 @@
       this.spawnTrainTimelapse -= deltaTime;
       if (this.spawnTrainTimelapse <= 0) {
         console.log("TODO: spawn trains every few seconds");
+        this.spawnTrainTimelapse = this.spawnTrainTime;
       }
       if (deltaTime >= this.frameDelay) {
         this.trains.forEach((train) => {

@@ -244,9 +244,21 @@ export class GameMap {
         return this.level_design[Math.floor(y)][Math.floor(x)]
     }
     GetDirection(x: number, y: number) {
+        if(y >= this.level_design.length || y < 0){
+            return Direction.NEUTRAL
+        }
+        if(x >= this.level_design[0].length || x < 0){
+            return Direction.NEUTRAL
+        }
         return this.level_directions[Math.floor(y)][Math.floor(x)]
     }
     GetBefore(x: number, y: number) {
+        if(y >= this.level_design.length || y < 0){
+            return Direction.NEUTRAL
+        }
+        if(x >= this.level_design[0].length || x < 0){
+            return Direction.NEUTRAL
+        }
         return this.level_before[Math.floor(y)][Math.floor(x)]
     }
     

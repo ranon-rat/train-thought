@@ -13,14 +13,16 @@ function string2Map(map: string) {
     }))
 }
 const map_string = [
-    "-----------",
-    "--H--H-----",
-    "--R--R-----",
-    "--CRRCRRS--",
-    "--R--------",
-    "--R--------",
-    "--H--------",
-    "-----------",
+    "----------------------",
+    "--H------H------------",
+    "--R------R------------",
+    "--CRRRRRRCRRS---------",
+    "--R-------------------",
+    "--R-------------------",
+    "--R-------------------",
+    "--R-------------------",
+    "--H-------------------",
+    "----------------------",
 ].join("\n");
 export class Game {
     gameMap: GameMap
@@ -29,7 +31,7 @@ export class Game {
     private lastFrameTime: number = 0
     private readonly FPS = 60
     private readonly frameDelay = 1000 / 60 // tiempo mínimo entre frames en ms
-    private spawnTrainTime = 1000
+    private spawnTrainTime = 10000
     private spawnTrainTimelapse: number = this.spawnTrainTime
     correct_trains: number = 0
     total_trains: number = 0
@@ -59,6 +61,7 @@ export class Game {
         if (this.spawnTrainTimelapse <= 0) {
             // TODO: spawn trains every few seconds
             console.log("TODO: spawn trains every few seconds")
+            this.spawnTrainTimelapse = this.spawnTrainTime
             //   this.spawnTrainTimelapse = this.spawnTrainTime
             //   this.spawnTrain(0, 0)
 

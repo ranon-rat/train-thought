@@ -40,7 +40,7 @@ export class Train {
         next = this.rotatingDirection
 
         if (before !== next && before !== Direction.NEUTRAL) {
-            console.log(this.printDirection(before), this.printDirection(next));
+            //console.log(this.printDirection(before), this.printDirection(next));
             const vector = Math.SQRT1_2
             const [to_go_UP,to_go_DOWN,to_go_LEFT,to_go_RIGHT]=[-vector,vector,-vector,vector]
             switch (true) {
