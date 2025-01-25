@@ -11,69 +11,94 @@ export class Train {
     // per second that means 1000 milliseconds
     initialVelocity: number = 0.5
     velocity: number = this.initialVelocity / 1000
-    initialProgress: number = 3 // this is per 1000 
-    dProgress: number = this.initialProgress / 1000
-    progress: number = 0
 
-    dX: number = 0
-    dY: number = 0
-
-    rotating: boolean = false
     rotatingDirection: Direction = Direction.NEUTRAL
     constructor(x: number, y: number, map: GameMap) {
         this.length = map.GetLength() / 2
-        this.x = x + 0.5
-        this.y = y + 0.5
-        this.angle = this.getNextAngle(map.GetDirection(x, y))
+        this.y = (y + 0.5)
+        this.x = (x + 0.5)
     }
 
     resize(length: number) {
         this.length = length / 2
     }
     Move(map: GameMap, x: number, y: number): [number, number] {
-        //const before = map.GetBefore(x + this.dX / 2, y + this.dY / 2)
-        let next = map.GetDirection(x - this.dX / 2, y - this.dY / 2)
-        let point = map.GetPoint(x - this.dX / 2, y - this.dY / 2)
-  
-        if (point === Kind.CHANGING_RAIL) {
-            if (this.rotatingDirection === Direction.NEUTRAL) {
-                this.rotatingDirection = next
-                this.rotating = true
+        const before = map.GetBefore(x, y)
+        let next = map.GetDirection(x, y)
+        let point = map.GetPoint(x, y)
+        let [dx, dy] = [0, 0]
+        if (next === Direction.NEUTRAL) {
+            return [dx, dy]
+        }
+        if (this.rotatingDirection === Direction.NEUTRAL || point !== Kind.CHANGING_RAIL) {
+            this.rotatingDirection = next
+        }
+        next = this.rotatingDirection
+
+        if (before !== next && before !== Direction.NEUTRAL) {
+            console.log(this.printDirection(before), this.printDirection(next));
+            const vector = 0.70710678118
+            const to_go_UP = -vector
+            const to_go_DOWN = vector
+            const to_go_LEFT = -vector
+            const to_go_RIGHT = vector
+            switch (true) {
+                // viene de abajo va hacia arriba
+                case (before === Direction.DOWN && next === Direction.LEFT):
+                //    [dx, dy] = [to_go_LEFT, to_go_UP]
+                //    break
+                //// viene de al lado va hacia abajo
+                case (before === Direction.LEFT && next === Direction.DOWN):
+                    [dx, dy] = [to_go_LEFT, to_go_UP]
+                    break
+                // viene de al lado va hacia arriba
+                case (before === Direction.LEFT && next === Direction.UP):
+                //    [dx, dy] = [to_go_LEFT, to_go_DOWN]
+                //    break
+                ////viene de arriba va hacia abajo
+                case (before === Direction.UP && next === Direction.LEFT):
+                    [dx, dy] = [to_go_LEFT, to_go_DOWN]
+                    break
+                // viene de abajo va hacia arriba 
+                case (before === Direction.DOWN && next === Direction.RIGHT):
+                //    [dx, dy] = [to_go_RIGHT, to_go_UP]
+                //    break
+                //// viene de al lado va hacia abajo
+                case (before === Direction.RIGHT && next === Direction.DOWN):
+                    [dx, dy] = [to_go_RIGHT, to_go_UP]
+                    break
+                // viene de arriba va hacia al abajo
+                case (before === Direction.UP && next === Direction.RIGHT):
+                //    [dx, dy] = [to_go_RIGHT, to_go_DOWN]
+                //    break
+                //// viene de al lado va hacia arriba
+                case (before === Direction.RIGHT && next === Direction.UP): // okay this is ready
+                    [dx, dy] = [to_go_RIGHT, to_go_DOWN]
+                    break
+
+                default:
+                    [dx, dy] = this.getNextPosition(next)
             }
-            console.log(this.rotatingDirection,next)
-        
-            next = this.rotatingDirection
-            console.log(this.rotatingDirection,next)
         } else {
-            this.rotatingDirection = Direction.NEUTRAL
-            this.rotating = false
+            // Movimiento en línea recta
+            [dx, dy] = this.getNextPosition(next)
+            if (point !== Kind.CHANGING_RAIL) {
+                this.rotatingDirection = Direction.NEUTRAL
+            }
         }
 
-        // Movimiento normal en línea recta
-        const pos = this.getNextPosition(next)
-        this.dX = pos[0]
-        this.dY = pos[1]
-        return [x + pos[0] * this.velocity, y + pos[1] * this.velocity]
+        return [dx, dy]
     }
-    private getNextAngle(direction: Direction): number {
-
+    printDirection(direction: Direction) {
         switch (direction) {
-            case Direction.RIGHT:
-                console.log("RIGHT")
-                return 0
-            case Direction.LEFT:
-                console.log("LEFT")
-                return Math.PI
-            case Direction.UP:
-                console.log("UP")
-                return Math.PI / 2
-            case Direction.DOWN:
-                console.log("DOWN")
-
-                return Math.PI * 3 / 2
-            default: return 0
+            case Direction.RIGHT: return "RIGHT"
+            case Direction.LEFT: return "LEFT"
+            case Direction.UP: return "UP"
+            case Direction.DOWN: return "DOWN"
+            default: return "NEUTRAL"
         }
     }
+
     // x y 
     private getNextPosition(direction: Direction): [number, number] {
         switch (direction) {
@@ -86,23 +111,26 @@ export class Train {
     }
 
     Draw(map: GameMap, ctx: CanvasRenderingContext2D) {
-        // the back part
+        // Redondeamos las coordenadas para el cálculo del punto
+
         const point = map.GetPoint(this.x, this.y)
+        const [dx, dy] = this.Move(map, this.x, this.y)
         if (![Kind.EMPTY, Kind.HOUSE].includes(point)) {
-            const [x, y] = this.Move(map, this.x, this.y, )
-            this.x = x
-            this.y = y
+            // Actualizamos posición con precisión fija
+            this.x += dx * this.velocity
+            this.y += dy * this.velocity
             ctx.fillStyle = "black"
-            ctx.fillRect((this.x) * map.length, (this.y) * map.length, 10, 10)
+            ctx.fillRect(this.x * map.length, this.y * map.length, 10, 10)
             return
         }
         this.ready = true
+
     }
+
     // entonces como puedo definir hacia donde he de ir? hmmmm
     // aqui le paso el delta time de los fps 
     changeSpeed(time: number) {
-        this.dProgress = this.initialProgress * (time / 1000)
-        this.velocity = this.initialVelocity * (time / 1000)
+        this.velocity = (this.initialVelocity) * (time / 1000)
     }
 
 }

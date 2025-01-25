@@ -223,58 +223,89 @@
       // per second that means 1000 milliseconds
       this.initialVelocity = 0.5;
       this.velocity = this.initialVelocity / 1e3;
-      this.initialProgress = 3;
-      // this is per 1000 
-      this.dProgress = this.initialProgress / 1e3;
-      this.progress = 0;
-      this.dX = 0;
-      this.dY = 0;
-      this.rotating = false;
       this.rotatingDirection = 0 /* NEUTRAL */;
       this.length = map.GetLength() / 2;
-      this.x = x + 0.5;
       this.y = y + 0.5;
-      this.angle = this.getNextAngle(map.GetDirection(x, y));
+      this.x = x + 0.5;
     }
     resize(length) {
       this.length = length / 2;
     }
     Move(map, x, y) {
-      let next = map.GetDirection(x - this.dX / 2, y - this.dY / 2);
-      let point = map.GetPoint(x - this.dX / 2, y - this.dY / 2);
-      if (point === 3 /* CHANGING_RAIL */) {
-        if (this.rotatingDirection === 0 /* NEUTRAL */) {
-          this.rotatingDirection = next;
-          this.rotating = true;
-        }
-        console.log(this.rotatingDirection, next);
-        next = this.rotatingDirection;
-        console.log(this.rotatingDirection, next);
-      } else {
-        this.rotatingDirection = 0 /* NEUTRAL */;
-        this.rotating = false;
+      const before = map.GetBefore(x, y);
+      let next = map.GetDirection(x, y);
+      let point = map.GetPoint(x, y);
+      let [dx, dy] = [0, 0];
+      if (next === 0 /* NEUTRAL */) {
+        return [dx, dy];
       }
-      const pos = this.getNextPosition(next);
-      this.dX = pos[0];
-      this.dY = pos[1];
-      return [x + pos[0] * this.velocity, y + pos[1] * this.velocity];
+      if (this.rotatingDirection === 0 /* NEUTRAL */ || point !== 3 /* CHANGING_RAIL */) {
+        this.rotatingDirection = next;
+      }
+      next = this.rotatingDirection;
+      if (before !== next && before !== 0 /* NEUTRAL */) {
+        console.log(this.printDirection(before), this.printDirection(next));
+        const vector = 0.70710678118;
+        const to_go_UP = -vector;
+        const to_go_DOWN = vector;
+        const to_go_LEFT = -vector;
+        const to_go_RIGHT = vector;
+        switch (true) {
+          // viene de abajo va hacia arriba
+          case (before === 4 /* DOWN */ && next === 1 /* LEFT */):
+          //    [dx, dy] = [to_go_LEFT, to_go_UP]
+          //    break
+          //// viene de al lado va hacia abajo
+          case (before === 1 /* LEFT */ && next === 4 /* DOWN */):
+            [dx, dy] = [to_go_LEFT, to_go_UP];
+            break;
+          // viene de al lado va hacia arriba
+          case (before === 1 /* LEFT */ && next === 3 /* UP */):
+          //    [dx, dy] = [to_go_LEFT, to_go_DOWN]
+          //    break
+          ////viene de arriba va hacia abajo
+          case (before === 3 /* UP */ && next === 1 /* LEFT */):
+            [dx, dy] = [to_go_LEFT, to_go_DOWN];
+            break;
+          // viene de abajo va hacia arriba 
+          case (before === 4 /* DOWN */ && next === 2 /* RIGHT */):
+          //    [dx, dy] = [to_go_RIGHT, to_go_UP]
+          //    break
+          //// viene de al lado va hacia abajo
+          case (before === 2 /* RIGHT */ && next === 4 /* DOWN */):
+            [dx, dy] = [to_go_RIGHT, to_go_UP];
+            break;
+          // viene de arriba va hacia al abajo
+          case (before === 3 /* UP */ && next === 2 /* RIGHT */):
+          //    [dx, dy] = [to_go_RIGHT, to_go_DOWN]
+          //    break
+          //// viene de al lado va hacia arriba
+          case (before === 2 /* RIGHT */ && next === 3 /* UP */):
+            [dx, dy] = [to_go_RIGHT, to_go_DOWN];
+            break;
+          default:
+            [dx, dy] = this.getNextPosition(next);
+        }
+      } else {
+        [dx, dy] = this.getNextPosition(next);
+        if (point !== 3 /* CHANGING_RAIL */) {
+          this.rotatingDirection = 0 /* NEUTRAL */;
+        }
+      }
+      return [dx, dy];
     }
-    getNextAngle(direction) {
+    printDirection(direction) {
       switch (direction) {
         case 2 /* RIGHT */:
-          console.log("RIGHT");
-          return 0;
+          return "RIGHT";
         case 1 /* LEFT */:
-          console.log("LEFT");
-          return Math.PI;
+          return "LEFT";
         case 3 /* UP */:
-          console.log("UP");
-          return Math.PI / 2;
+          return "UP";
         case 4 /* DOWN */:
-          console.log("DOWN");
-          return Math.PI * 3 / 2;
+          return "DOWN";
         default:
-          return 0;
+          return "NEUTRAL";
       }
     }
     // x y 
@@ -294,10 +325,10 @@
     }
     Draw(map, ctx2) {
       const point = map.GetPoint(this.x, this.y);
+      const [dx, dy] = this.Move(map, this.x, this.y);
       if (![0 /* EMPTY */, 1 /* HOUSE */].includes(point)) {
-        const [x, y] = this.Move(map, this.x, this.y);
-        this.x = x;
-        this.y = y;
+        this.x += dx * this.velocity;
+        this.y += dy * this.velocity;
         ctx2.fillStyle = "black";
         ctx2.fillRect(this.x * map.length, this.y * map.length, 10, 10);
         return;
@@ -307,7 +338,6 @@
     // entonces como puedo definir hacia donde he de ir? hmmmm
     // aqui le paso el delta time de los fps 
     changeSpeed(time) {
-      this.dProgress = this.initialProgress * (time / 1e3);
       this.velocity = this.initialVelocity * (time / 1e3);
     }
   };
@@ -324,11 +354,25 @@
       this.spawnTrainTime = 1e3;
       this.spawnTrainTimelapse = this.spawnTrainTime;
       this.gameMap = new GameMap([
-        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */],
-        [1 /* HOUSE */, 2 /* RAIL */, 3 /* CHANGING_RAIL */, 2 /* RAIL */, 2 /* RAIL */, 1 /* HOUSE */, 0 /* EMPTY */],
-        [0 /* EMPTY */, 0 /* EMPTY */, 2 /* RAIL */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */],
-        [0 /* EMPTY */, 0 /* EMPTY */, 2 /* RAIL */, 2 /* RAIL */, 2 /* RAIL */, 4 /* SPAWNER */, 0 /* EMPTY */],
-        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */]
+        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */],
+        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */],
+        [0 /* EMPTY */, 1 /* HOUSE */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 1 /* HOUSE */, 0 /* EMPTY */, 0 /* EMPTY */],
+        [1 /* HOUSE */, 3 /* CHANGING_RAIL */, 2 /* RAIL */, 3 /* CHANGING_RAIL */, 2 /* RAIL */, 3 /* CHANGING_RAIL */, 1 /* HOUSE */, 0 /* EMPTY */],
+        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 2 /* RAIL */, 0 /* EMPTY */, 1 /* HOUSE */, 0 /* EMPTY */, 0 /* EMPTY */],
+        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 2 /* RAIL */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */],
+        [0 /* EMPTY */, 1 /* HOUSE */, 2 /* RAIL */, 3 /* CHANGING_RAIL */, 2 /* RAIL */, 2 /* RAIL */, 1 /* HOUSE */, 0 /* EMPTY */],
+        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 2 /* RAIL */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */],
+        [0 /* EMPTY */, 2 /* RAIL */, 2 /* RAIL */, 3 /* CHANGING_RAIL */, 2 /* RAIL */, 3 /* CHANGING_RAIL */, 4 /* SPAWNER */, 0 /* EMPTY */],
+        [0 /* EMPTY */, 1 /* HOUSE */, 0 /* EMPTY */, 2 /* RAIL */, 0 /* EMPTY */, 1 /* HOUSE */, 0 /* EMPTY */, 0 /* EMPTY */],
+        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 2 /* RAIL */, 0 /* EMPTY */, 1 /* HOUSE */, 0 /* EMPTY */, 0 /* EMPTY */],
+        [0 /* EMPTY */, 1 /* HOUSE */, 2 /* RAIL */, 3 /* CHANGING_RAIL */, 2 /* RAIL */, 3 /* CHANGING_RAIL */, 1 /* HOUSE */, 0 /* EMPTY */],
+        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 2 /* RAIL */, 0 /* EMPTY */, 0 /* EMPTY */],
+        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 1 /* HOUSE */, 0 /* EMPTY */, 2 /* RAIL */, 0 /* EMPTY */, 0 /* EMPTY */],
+        [0 /* EMPTY */, 1 /* HOUSE */, 2 /* RAIL */, 3 /* CHANGING_RAIL */, 2 /* RAIL */, 3 /* CHANGING_RAIL */, 1 /* HOUSE */, 0 /* EMPTY */],
+        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 2 /* RAIL */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */],
+        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 1 /* HOUSE */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */],
+        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */],
+        [0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */, 0 /* EMPTY */]
       ]);
     }
     spawnTrain() {

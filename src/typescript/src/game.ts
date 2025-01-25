@@ -14,11 +14,27 @@ export class Game {
 
     constructor() {
         this.gameMap = new GameMap([
-            [Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY],
-            [Kind.HOUSE, Kind.RAIL, Kind.CHANGING_RAIL, Kind.RAIL, Kind.RAIL, Kind.HOUSE, Kind.EMPTY],
-            [Kind.EMPTY, Kind.EMPTY, Kind.RAIL, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY],
-            [Kind.EMPTY, Kind.EMPTY, Kind.RAIL, Kind.RAIL, Kind.RAIL, Kind.SPAWNER, Kind.EMPTY],
-            [Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY],
+            [Kind.EMPTY,Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY],
+            [Kind.EMPTY,Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY],
+            [Kind.EMPTY,Kind.HOUSE, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.HOUSE, Kind.EMPTY, Kind.EMPTY],
+            [Kind.HOUSE,Kind.CHANGING_RAIL, Kind.RAIL, Kind.CHANGING_RAIL, Kind.RAIL, Kind.CHANGING_RAIL, Kind.HOUSE, Kind.EMPTY],
+            [Kind.EMPTY,Kind.EMPTY, Kind.EMPTY, Kind.RAIL, Kind.EMPTY, Kind.HOUSE, Kind.EMPTY, Kind.EMPTY],
+            [Kind.EMPTY,Kind.EMPTY, Kind.EMPTY, Kind.RAIL, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY],
+            [Kind.EMPTY,Kind.HOUSE, Kind.RAIL, Kind.CHANGING_RAIL, Kind.RAIL, Kind.RAIL, Kind.HOUSE, Kind.EMPTY],
+            [Kind.EMPTY,Kind.EMPTY, Kind.EMPTY, Kind.RAIL, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY],
+            [Kind.EMPTY,Kind.RAIL, Kind.RAIL, Kind.CHANGING_RAIL, Kind.RAIL, Kind.CHANGING_RAIL, Kind.SPAWNER, Kind.EMPTY],
+            [Kind.EMPTY,Kind.HOUSE, Kind.EMPTY, Kind.RAIL, Kind.EMPTY, Kind.HOUSE   , Kind.EMPTY, Kind.EMPTY],
+            [Kind.EMPTY,Kind.EMPTY, Kind.EMPTY, Kind.RAIL, Kind.EMPTY, Kind.HOUSE, Kind.EMPTY, Kind.EMPTY],
+            [Kind.EMPTY,Kind.HOUSE, Kind.RAIL, Kind.CHANGING_RAIL, Kind.RAIL, Kind.CHANGING_RAIL, Kind.HOUSE, Kind.EMPTY],
+            [Kind.EMPTY,Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.RAIL, Kind.EMPTY, Kind.EMPTY],
+            [Kind.EMPTY,Kind.EMPTY, Kind.EMPTY, Kind.HOUSE, Kind.EMPTY, Kind.RAIL, Kind.EMPTY, Kind.EMPTY],
+            [Kind.EMPTY,Kind.HOUSE, Kind.RAIL, Kind.CHANGING_RAIL, Kind.RAIL, Kind.CHANGING_RAIL, Kind.HOUSE, Kind.EMPTY],
+            [Kind.EMPTY,Kind.EMPTY, Kind.EMPTY, Kind.RAIL, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY],
+            [Kind.EMPTY,Kind.EMPTY, Kind.EMPTY, Kind.HOUSE, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY],
+            [Kind.EMPTY,Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY],
+            [Kind.EMPTY,Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY],
+
+
         ])
 
 
