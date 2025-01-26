@@ -1,4 +1,15 @@
 import { Kind, Direction, around } from "./types-enum-constants"
+function its_out_of_bounds(x:number,y:number,list:any[][]){
+    if(y >= list.length || y < 0)return true    
+    return x >= list[y].length || x < 0
+}
+function draw_circle(x:number,y:number,dx:number,dy:number,radious:number,ctx:CanvasRenderingContext2D,color:string){
+    ctx.beginPath()
+    ctx.fillStyle = color
+    ctx.arc(x * dx + dx / 2, y * dy + dy / 2, radious, 0, 2 * Math.PI)
+    ctx.fill()
+    ctx.closePath()
+}
 export class GameMap {
     level_design: Kind[][] = [
         [Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY],
@@ -15,8 +26,7 @@ export class GameMap {
     changing_rails_pos: number[][]
     houses_id:number[][]=[]
     houses_length:number=0
-    spawner_x: number = 0
-    spawner_y: number = 0
+   
     width: number = 0
     height: number = 0
     length: number = 0
@@ -59,26 +69,20 @@ export class GameMap {
     DrawPart(x: number, y: number, dx: number, dy: number, kind: Kind, ctx: CanvasRenderingContext2D) {
         switch (kind) {
             case Kind.HOUSE:
-                ctx.fillStyle = "rgb(150,150,150)";
-                ctx.fillRect(x * dx, y * dy, dx, dy);
+                draw_circle(x,y,dx,dy,dx/2,ctx,"rgb(150,150,150)")
+                draw_circle(x,y,dx,dy,dx/4,ctx,"white")
+                ctx.fillStyle = "black"
+                ctx.textAlign = "center"
+                ctx.font = "10px Arial"
+              //  ctx.fillText(`${this.houses_id[y][x]}`,x * dx + dx / 2, y * dy + dy / 2);
                 break
-            case Kind.RAIL:
-                ctx.fillStyle = "rgb(255,0,0)";
-                ctx.fillRect(x * dx, y * dy, dx, dy);
-                break
+           
             case Kind.CHANGING_RAIL:
-                ctx.fillStyle = "rgb(0,255,0)";
-                ctx.fillRect(x * dx, y * dy, dx, dy);
-                ctx.strokeStyle = "rgb(0,0,0)"
-                ctx.lineWidth = 2
-                const content = [
-                    { v: Direction.UP, c: "U" },
-                    { v: Direction.DOWN, c: "D" },
-                    { v: Direction.LEFT, c: "L" },
-                    { v: Direction.RIGHT, c: "R" }
-                ]
-                ctx.fillStyle = "rgb(0,0,0)"
-                ctx.fillText(content.find(v => v.v === this.level_directions[y][x])!.c, x * dx + dx / 2, y * dy + dy / 2);
+                ctx.beginPath()
+                ctx.fillStyle = "rgb(25, 17, 59)"
+                ctx.arc(x * dx + dx / 2, y * dy + dy / 2, dx / 2, 0, 2 * Math.PI)
+                ctx.fill()
+                ctx.closePath()
                 break
             case Kind.SPAWNER:
                 ctx.fillStyle = "rgb(0,0,255)"
@@ -89,36 +93,14 @@ export class GameMap {
         }
     }
 
-    DrawLineFromOrigin(x: number, y: number, dx: number, dy: number, ctx: CanvasRenderingContext2D) {
-        ctx.strokeStyle = "rgb(0,0,0)"
-        ctx.lineWidth = 2
-        const center_x = x * dx + dx / 2
-        const center_y = y * dy + dy / 2
-        const [up_y, down_y, left_x, right_x] = [(y + 1) * dy, y * dy, x * dx, (x + 1) * dx]
-
-        const before = this.level_before[y][x]
-        const next = this.level_directions[y][x]
-
-        const around = [
-            { v: Direction.UP, x: center_x, y: down_y, x2: center_x, y2: up_y },
-            { v: Direction.DOWN, x: center_x, y: up_y, x2: center_x, y2: down_y },
-            { v: Direction.LEFT, x: right_x, y: center_y, x2: left_x, y2: center_y },
-            { v: Direction.RIGHT, x: left_x, y: center_y, x2: right_x, y2: center_y }
-        ]
-
-        const direction_before = around.find(v => v.v === before)!
-        const direction_next = around.find(v => v.v === next)!
-        this.DrawLine(direction_before.x, direction_before.y, direction_next.x2, direction_next.y2, ctx)
-
-    }
+   
     SetupMap() {
         for (let y = 0; y < this.level_design.length; y++) {
             for (let x = 0; x < this.level_design[y].length; x++) {
                 if (this.level_design[y][x] !== Kind.SPAWNER) {
                     continue
                 }
-                this.spawner_x = x;
-                this.spawner_y = y;
+                this.spawners.push([y,x])
                 this.SetupPlayingMap(y, x, Direction.NEUTRAL)
                 return
             }
@@ -130,7 +112,6 @@ export class GameMap {
         const level_y = Math.floor((y / height) * this.height)
         this.UpdateChangingRails(level_x, level_y)
     }
-
     public CheckDirections(x: number, y: number, before: Direction): [number, number, Direction][] {
         // y x v
         // with this i delete the things that will make me go backwards
@@ -200,12 +181,7 @@ export class GameMap {
             return
         }
     }
-    CheckHouse(x: number, y: number){
-        return this.houses_id[Math.floor(y)][Math.floor(x)]
-    }
-    GetHousesLength(){
-        return this.houses_length
-    }
+    
     UpdateChangingRails(x: number, y: number) {
         if (this.GetPoint(x, y) !== Kind.CHANGING_RAIL) {
             return
@@ -220,14 +196,67 @@ export class GameMap {
         this.level_directions[y][x] = this.changing_rails_directions[y][x][this.changing_rails_pos[y][x]]
 
     }
-    DrawLine(x1: number, y1: number, x2: number, y2: number, ctx: CanvasRenderingContext2D) {
-        ctx.strokeStyle = "rgb(0,0,0)"
-        ctx.lineWidth = 2
-        ctx.beginPath()
-        ctx.moveTo(x1, y1)
-        ctx.lineTo(x2, y2)
-        ctx.stroke()
+    DrawLineFromOrigin(x: number, y: number, dx: number, dy: number, ctx: CanvasRenderingContext2D) {
+        
+        const center_x = x * dx + dx / 2
+        const center_y = y * dy + dy / 2
+        const [up_y, down_y, left_x, right_x] = [(y + 1) * dy, y * dy, x * dx, (x + 1) * dx]
+
+        const before = this.level_before[y][x]
+        const next = this.level_directions[y][x]
+
+        const around = [
+            { v: Direction.UP, x: center_x, y: down_y, x2: center_x, y2: up_y },
+            { v: Direction.DOWN, x: center_x, y: up_y, x2: center_x, y2: down_y },
+            { v: Direction.LEFT, x: right_x, y: center_y, x2: left_x, y2: center_y },
+            { v: Direction.RIGHT, x: left_x, y: center_y, x2: right_x, y2: center_y }
+        ]
+
+        const direction_before = around.find(v => v.v === before)!
+        const direction_next = around.find(v => v.v === next)!
+        if(before!==next){
+            this.DrawCircle(direction_before.x, direction_before.y, dx/10, dy/10, ctx)
+            this.DrawCircle(direction_next.x, direction_next.y, dx/10, dy/10, ctx)
+        }
+
+        this.DrawLine(direction_before.x, direction_before.y, direction_next.x2, direction_next.y2, ctx)
+
     }
+    DrawCircle(x:number,y:number,dx:number,dy:number,ctx:CanvasRenderingContext2D){
+        ctx.beginPath()
+        ctx.fillStyle = "rgb(56, 134, 124)"
+        ctx.arc(x * dx + dx / 2, y * dy + dy / 2,10, 0, 2 * Math.PI)
+
+        ctx.fill()
+        ctx.closePath()
+    }
+    DrawLine(x1: number, y1: number, x2: number, y2: number, ctx: CanvasRenderingContext2D) {
+        this.DrawLineColor(x1,y1,x2,y2,ctx,"rgb(56, 134, 124)",15)
+    }
+    DrawLineColor(x1: number, y1: number, x2: number, y2: number, ctx: CanvasRenderingContext2D,color:string,glowSize:number) {
+    
+        // Configurar la sombra para el efecto de neón
+        const prev_shadow = ctx.shadowColor
+        const prev_glow = ctx.shadowBlur
+        const prev_stroke = ctx.strokeStyle
+        const prev_width = ctx.lineWidth
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        
+        ctx.shadowColor = color;
+        ctx.shadowBlur = glowSize;
+        // Dibujar la línea
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        ctx.closePath();
+        ctx.shadowColor = prev_shadow
+        ctx.shadowBlur = prev_glow
+        ctx.strokeStyle = prev_stroke
+        ctx.lineWidth = prev_width
+    }
+  
     UpdateLength(length: number) {
         this.length = length
     }
@@ -235,31 +264,31 @@ export class GameMap {
         return this.length
     }
     GetPoint(x: number, y: number): Kind {
-        if(y >= this.level_design.length || y < 0){
-            return Kind.EMPTY
-        }
-        if(x >= this.level_design[0].length || x < 0){
-            return Kind.EMPTY
-        }
-        return this.level_design[Math.floor(y)][Math.floor(x)]
+        const y_floor = Math.floor(y)
+        const x_floor = Math.floor(x)
+        if(its_out_of_bounds(x_floor,y_floor,this.level_design))return Kind.EMPTY
+        return this.level_design[y_floor][x_floor]
     }
     GetDirection(x: number, y: number) {
-        if(y >= this.level_design.length || y < 0){
-            return Direction.NEUTRAL
-        }
-        if(x >= this.level_design[0].length || x < 0){
-            return Direction.NEUTRAL
-        }
-        return this.level_directions[Math.floor(y)][Math.floor(x)]
+        const y_floor = Math.floor(y)
+        const x_floor = Math.floor(x)
+        if(its_out_of_bounds(x_floor,y_floor,this.level_directions))return Direction.NEUTRAL
+        return this.level_directions[y_floor][x_floor]
     }
     GetBefore(x: number, y: number) {
-        if(y >= this.level_design.length || y < 0){
-            return Direction.NEUTRAL
-        }
-        if(x >= this.level_design[0].length || x < 0){
-            return Direction.NEUTRAL
-        }
-        return this.level_before[Math.floor(y)][Math.floor(x)]
+        const y_floor = Math.floor(y)
+        const x_floor = Math.floor(x)
+        if(its_out_of_bounds(x_floor,y_floor,this.level_before))return Direction.NEUTRAL
+        return this.level_before[y_floor][x_floor]
     }
-    
+    CheckHouse(x: number, y: number){
+        const y_floor = Math.floor(y)
+        const x_floor = Math.floor(x)
+        if(its_out_of_bounds(x_floor,y_floor,this.houses_id))return -1
+            return this.houses_id[y_floor][x_floor]
+    }
+    GetHousesLength(){
+        return this.houses_length
+    } 
 }
+

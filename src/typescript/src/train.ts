@@ -9,27 +9,34 @@ export class Train {
     length: number = 0
     angle: number = 0
     // per second that means 1000 milliseconds
-    initialVelocity: number = 0.5
+    initialVelocity: number = 1
     velocity: number = this.initialVelocity / 1000
 
     house_id: number = -1
     is_correct: boolean = false
 
     rotatingDirection: Direction = Direction.NEUTRAL
+
+    dX: number = 0
+    dY: number = 0
     constructor(x: number, y: number, map: GameMap, house_id: number) {
-        this.length = map.GetLength() / 2
+        this.length = map.GetLength() / 3
         this.y = (y + 0.5)
         this.x = (x + 0.5)
         this.house_id = house_id
     }
-
     resize(length: number) {
-        this.length = length / 2
+        this.length = length / 3
     }
     Move(map: GameMap, x: number, y: number): [number, number] {
-        const before = map.GetBefore(x, y)
-        let next = map.GetDirection(x, y)
+        let [x_l,y_l] = [x,y]
         let point = map.GetPoint(x, y)
+        if (point === Kind.HOUSE) {
+            [x_l,y_l] = [x_l-this.dX/2,y_l-this.dY/2]
+        }
+        const before = map.GetBefore(x_l, y_l)
+        let next = map.GetDirection(x_l, y_l)
+
         let [dx, dy] = [0, 0]
         if (next === Direction.NEUTRAL) {
             return [dx, dy]
@@ -42,7 +49,7 @@ export class Train {
         if (before !== next && before !== Direction.NEUTRAL) {
             //console.log(this.printDirection(before), this.printDirection(next));
             const vector = Math.SQRT1_2
-            const [to_go_UP,to_go_DOWN,to_go_LEFT,to_go_RIGHT]=[-vector,vector,-vector,vector]
+            const [to_go_UP, to_go_DOWN, to_go_LEFT, to_go_RIGHT] = [-vector, vector, -vector, vector]
             switch (true) {
                 // viene de abajo va hacia arriba
                 case (before === Direction.DOWN && next === Direction.LEFT):
@@ -76,7 +83,12 @@ export class Train {
                 this.rotatingDirection = Direction.NEUTRAL
             }
         }
-
+        if (point === Kind.HOUSE) {
+            [dx, dy] = this.getNextPosition(before);
+            console.log("here we are")
+        }
+        this.dX = dx
+        this.dY = dy
         return [dx, dy]
     }
     printDirection(direction: Direction) {
@@ -104,18 +116,33 @@ export class Train {
         // Redondeamos las coordenadas para el cálculo del punto
 
         const point = map.GetPoint(this.x, this.y)
-        const [dx, dy] = this.Move(map, this.x, this.y)
-        if (![Kind.EMPTY, Kind.HOUSE].includes(point)) {
-            // Actualizamos posición con precisión fija
-            this.x += dx * this.velocity
-            this.y += dy * this.velocity
-            ctx.fillStyle = "black"
-            ctx.fillRect(this.x * map.length, this.y * map.length, 10, 10)
+        const before = map.GetPoint(this.x - this.dX / 2, this.y - this.dY / 2)
+        console.log(point, before)
+        if (before === Kind.HOUSE || point === Kind.EMPTY) {
+            console.log("checking on house before")
+            this.is_correct = map.CheckHouse(this.x, this.y) === this.house_id
+            this.ready = true
             return
         }
-        this.is_correct = map.CheckHouse(this.x, this.y) === this.house_id
-        this.ready = true
 
+        // Actualizamos posición con precisión fija
+        const [dx, dy] = this.Move(map, this.x, this.y)
+        this.x += dx * this.velocity
+        this.y += dy * this.velocity
+        this.renderOrb(this.x*map.length,this.y*map.length,this.length,this.length,ctx)
+    
+        return
+    }
+    renderOrb(x:number,y:number,width:number,height:number,ctx:CanvasRenderingContext2D){
+        ctx.beginPath()
+        ctx.fillStyle = "white"
+        ctx.arc(x,y,height/2,0,2*Math.PI)
+        ctx.fill()
+        ctx.fillStyle = "black"
+        ctx.textAlign = "center"
+        ctx.font = "10px Arial"
+        ctx.fillText(`${this.house_id}`,x,y)
+        ctx.closePath()
     }
 
     // entonces como puedo definir hacia donde he de ir? hmmmm

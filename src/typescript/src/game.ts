@@ -31,7 +31,7 @@ export class Game {
     private lastFrameTime: number = 0
     private readonly FPS = 60
     private readonly frameDelay = 1000 / 60 // tiempo mínimo entre frames en ms
-    private spawnTrainTime = 10000
+    private spawnTrainTime = 1000
     private spawnTrainTimelapse: number = this.spawnTrainTime
     correct_trains: number = 0
     total_trains: number = 0
@@ -43,8 +43,9 @@ export class Game {
         //  if (this.trains.length >= 10) { return }
         const spawners = this.gameMap.spawners
         const random = Math.random() * spawners.length
-        const spawner = spawners[Math.floor(random)]
-        const train = new Train(spawner[1], spawner[0], this.gameMap, Math.floor(Math.random() * this.gameMap.GetHousesLength()))
+        const [y,x] = spawners[Math.floor(random)]
+        console.log(y,x,spawners)
+        const train = new Train(x, y, this.gameMap, Math.floor(Math.random() * this.gameMap.GetHousesLength()))
         this.trains.push(train)
         console.log("TODO train spawn")
     }
@@ -61,6 +62,9 @@ export class Game {
         if (this.spawnTrainTimelapse <= 0) {
             // TODO: spawn trains every few seconds
             console.log("TODO: spawn trains every few seconds")
+            if (Math.random() < 0.5) {
+                this.spawnTrain()
+            }
             this.spawnTrainTimelapse = this.spawnTrainTime
             //   this.spawnTrainTimelapse = this.spawnTrainTime
             //   this.spawnTrain(0, 0)

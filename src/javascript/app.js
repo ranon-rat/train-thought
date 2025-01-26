@@ -9,6 +9,17 @@
   ];
 
   // src/typescript/src/game-map.ts
+  function its_out_of_bounds(x, y, list) {
+    if (y >= list.length || y < 0) return true;
+    return x >= list[y].length || x < 0;
+  }
+  function draw_circle(x, y, dx, dy, radious, ctx2, color) {
+    ctx2.beginPath();
+    ctx2.fillStyle = color;
+    ctx2.arc(x * dx + dx / 2, y * dy + dy / 2, radious, 0, 2 * Math.PI);
+    ctx2.fill();
+    ctx2.closePath();
+  }
   var GameMap = class {
     constructor(level_design) {
       this.level_design = [
@@ -22,8 +33,6 @@
       this.spawners = [];
       this.houses_id = [];
       this.houses_length = 0;
-      this.spawner_x = 0;
-      this.spawner_y = 0;
       this.width = 0;
       this.height = 0;
       this.length = 0;
@@ -58,26 +67,18 @@
     DrawPart(x, y, dx, dy, kind, ctx2) {
       switch (kind) {
         case 1 /* HOUSE */:
-          ctx2.fillStyle = "rgb(150,150,150)";
-          ctx2.fillRect(x * dx, y * dy, dx, dy);
-          break;
-        case 2 /* RAIL */:
-          ctx2.fillStyle = "rgb(255,0,0)";
-          ctx2.fillRect(x * dx, y * dy, dx, dy);
+          draw_circle(x, y, dx, dy, dx / 2, ctx2, "rgb(150,150,150)");
+          draw_circle(x, y, dx, dy, dx / 4, ctx2, "white");
+          ctx2.fillStyle = "black";
+          ctx2.textAlign = "center";
+          ctx2.font = "10px Arial";
           break;
         case 3 /* CHANGING_RAIL */:
-          ctx2.fillStyle = "rgb(0,255,0)";
-          ctx2.fillRect(x * dx, y * dy, dx, dy);
-          ctx2.strokeStyle = "rgb(0,0,0)";
-          ctx2.lineWidth = 2;
-          const content = [
-            { v: 3 /* UP */, c: "U" },
-            { v: 4 /* DOWN */, c: "D" },
-            { v: 1 /* LEFT */, c: "L" },
-            { v: 2 /* RIGHT */, c: "R" }
-          ];
-          ctx2.fillStyle = "rgb(0,0,0)";
-          ctx2.fillText(content.find((v) => v.v === this.level_directions[y][x]).c, x * dx + dx / 2, y * dy + dy / 2);
+          ctx2.beginPath();
+          ctx2.fillStyle = "rgb(25, 17, 59)";
+          ctx2.arc(x * dx + dx / 2, y * dy + dy / 2, dx / 2, 0, 2 * Math.PI);
+          ctx2.fill();
+          ctx2.closePath();
           break;
         case 4 /* SPAWNER */:
           ctx2.fillStyle = "rgb(0,0,255)";
@@ -87,32 +88,13 @@
           break;
       }
     }
-    DrawLineFromOrigin(x, y, dx, dy, ctx2) {
-      ctx2.strokeStyle = "rgb(0,0,0)";
-      ctx2.lineWidth = 2;
-      const center_x = x * dx + dx / 2;
-      const center_y = y * dy + dy / 2;
-      const [up_y, down_y, left_x, right_x] = [(y + 1) * dy, y * dy, x * dx, (x + 1) * dx];
-      const before = this.level_before[y][x];
-      const next = this.level_directions[y][x];
-      const around2 = [
-        { v: 3 /* UP */, x: center_x, y: down_y, x2: center_x, y2: up_y },
-        { v: 4 /* DOWN */, x: center_x, y: up_y, x2: center_x, y2: down_y },
-        { v: 1 /* LEFT */, x: right_x, y: center_y, x2: left_x, y2: center_y },
-        { v: 2 /* RIGHT */, x: left_x, y: center_y, x2: right_x, y2: center_y }
-      ];
-      const direction_before = around2.find((v) => v.v === before);
-      const direction_next = around2.find((v) => v.v === next);
-      this.DrawLine(direction_before.x, direction_before.y, direction_next.x2, direction_next.y2, ctx2);
-    }
     SetupMap() {
       for (let y = 0; y < this.level_design.length; y++) {
         for (let x = 0; x < this.level_design[y].length; x++) {
           if (this.level_design[y][x] !== 4 /* SPAWNER */) {
             continue;
           }
-          this.spawner_x = x;
-          this.spawner_y = y;
+          this.spawners.push([y, x]);
           this.SetupPlayingMap(y, x, 0 /* NEUTRAL */);
           return;
         }
@@ -174,12 +156,6 @@
         return;
       }
     }
-    CheckHouse(x, y) {
-      return this.houses_id[Math.floor(y)][Math.floor(x)];
-    }
-    GetHousesLength() {
-      return this.houses_length;
-    }
     UpdateChangingRails(x, y) {
       if (this.GetPoint(x, y) !== 3 /* CHANGING_RAIL */) {
         return;
@@ -190,13 +166,54 @@
       }
       this.level_directions[y][x] = this.changing_rails_directions[y][x][this.changing_rails_pos[y][x]];
     }
+    DrawLineFromOrigin(x, y, dx, dy, ctx2) {
+      const center_x = x * dx + dx / 2;
+      const center_y = y * dy + dy / 2;
+      const [up_y, down_y, left_x, right_x] = [(y + 1) * dy, y * dy, x * dx, (x + 1) * dx];
+      const before = this.level_before[y][x];
+      const next = this.level_directions[y][x];
+      const around2 = [
+        { v: 3 /* UP */, x: center_x, y: down_y, x2: center_x, y2: up_y },
+        { v: 4 /* DOWN */, x: center_x, y: up_y, x2: center_x, y2: down_y },
+        { v: 1 /* LEFT */, x: right_x, y: center_y, x2: left_x, y2: center_y },
+        { v: 2 /* RIGHT */, x: left_x, y: center_y, x2: right_x, y2: center_y }
+      ];
+      const direction_before = around2.find((v) => v.v === before);
+      const direction_next = around2.find((v) => v.v === next);
+      if (before !== next) {
+        this.DrawCircle(direction_before.x, direction_before.y, dx / 10, dy / 10, ctx2);
+        this.DrawCircle(direction_next.x, direction_next.y, dx / 10, dy / 10, ctx2);
+      }
+      this.DrawLine(direction_before.x, direction_before.y, direction_next.x2, direction_next.y2, ctx2);
+    }
+    DrawCircle(x, y, dx, dy, ctx2) {
+      ctx2.beginPath();
+      ctx2.fillStyle = "rgb(56, 134, 124)";
+      ctx2.arc(x * dx + dx / 2, y * dy + dy / 2, 10, 0, 2 * Math.PI);
+      ctx2.fill();
+      ctx2.closePath();
+    }
     DrawLine(x1, y1, x2, y2, ctx2) {
-      ctx2.strokeStyle = "rgb(0,0,0)";
-      ctx2.lineWidth = 2;
+      this.DrawLineColor(x1, y1, x2, y2, ctx2, "rgb(56, 134, 124)", 15);
+    }
+    DrawLineColor(x1, y1, x2, y2, ctx2, color, glowSize) {
+      const prev_shadow = ctx2.shadowColor;
+      const prev_glow = ctx2.shadowBlur;
+      const prev_stroke = ctx2.strokeStyle;
+      const prev_width = ctx2.lineWidth;
+      ctx2.strokeStyle = color;
+      ctx2.lineWidth = 3;
+      ctx2.shadowColor = color;
+      ctx2.shadowBlur = glowSize;
       ctx2.beginPath();
       ctx2.moveTo(x1, y1);
       ctx2.lineTo(x2, y2);
       ctx2.stroke();
+      ctx2.closePath();
+      ctx2.shadowColor = prev_shadow;
+      ctx2.shadowBlur = prev_glow;
+      ctx2.strokeStyle = prev_stroke;
+      ctx2.lineWidth = prev_width;
     }
     UpdateLength(length) {
       this.length = length;
@@ -205,31 +222,31 @@
       return this.length;
     }
     GetPoint(x, y) {
-      if (y >= this.level_design.length || y < 0) {
-        return 0 /* EMPTY */;
-      }
-      if (x >= this.level_design[0].length || x < 0) {
-        return 0 /* EMPTY */;
-      }
-      return this.level_design[Math.floor(y)][Math.floor(x)];
+      const y_floor = Math.floor(y);
+      const x_floor = Math.floor(x);
+      if (its_out_of_bounds(x_floor, y_floor, this.level_design)) return 0 /* EMPTY */;
+      return this.level_design[y_floor][x_floor];
     }
     GetDirection(x, y) {
-      if (y >= this.level_design.length || y < 0) {
-        return 0 /* NEUTRAL */;
-      }
-      if (x >= this.level_design[0].length || x < 0) {
-        return 0 /* NEUTRAL */;
-      }
-      return this.level_directions[Math.floor(y)][Math.floor(x)];
+      const y_floor = Math.floor(y);
+      const x_floor = Math.floor(x);
+      if (its_out_of_bounds(x_floor, y_floor, this.level_directions)) return 0 /* NEUTRAL */;
+      return this.level_directions[y_floor][x_floor];
     }
     GetBefore(x, y) {
-      if (y >= this.level_design.length || y < 0) {
-        return 0 /* NEUTRAL */;
-      }
-      if (x >= this.level_design[0].length || x < 0) {
-        return 0 /* NEUTRAL */;
-      }
-      return this.level_before[Math.floor(y)][Math.floor(x)];
+      const y_floor = Math.floor(y);
+      const x_floor = Math.floor(x);
+      if (its_out_of_bounds(x_floor, y_floor, this.level_before)) return 0 /* NEUTRAL */;
+      return this.level_before[y_floor][x_floor];
+    }
+    CheckHouse(x, y) {
+      const y_floor = Math.floor(y);
+      const x_floor = Math.floor(x);
+      if (its_out_of_bounds(x_floor, y_floor, this.houses_id)) return -1;
+      return this.houses_id[y_floor][x_floor];
+    }
+    GetHousesLength() {
+      return this.houses_length;
     }
   };
 
@@ -244,23 +261,29 @@
       this.length = 0;
       this.angle = 0;
       // per second that means 1000 milliseconds
-      this.initialVelocity = 0.5;
+      this.initialVelocity = 1;
       this.velocity = this.initialVelocity / 1e3;
       this.house_id = -1;
       this.is_correct = false;
       this.rotatingDirection = 0 /* NEUTRAL */;
-      this.length = map.GetLength() / 2;
+      this.dX = 0;
+      this.dY = 0;
+      this.length = map.GetLength() / 3;
       this.y = y + 0.5;
       this.x = x + 0.5;
       this.house_id = house_id;
     }
     resize(length) {
-      this.length = length / 2;
+      this.length = length / 3;
     }
     Move(map, x, y) {
-      const before = map.GetBefore(x, y);
-      let next = map.GetDirection(x, y);
+      let [x_l, y_l] = [x, y];
       let point = map.GetPoint(x, y);
+      if (point === 1 /* HOUSE */) {
+        [x_l, y_l] = [x_l - this.dX / 2, y_l - this.dY / 2];
+      }
+      const before = map.GetBefore(x_l, y_l);
+      let next = map.GetDirection(x_l, y_l);
       let [dx, dy] = [0, 0];
       if (next === 0 /* NEUTRAL */) {
         return [dx, dy];
@@ -303,6 +326,12 @@
           this.rotatingDirection = 0 /* NEUTRAL */;
         }
       }
+      if (point === 1 /* HOUSE */) {
+        [dx, dy] = this.getNextPosition(before);
+        console.log("here we are");
+      }
+      this.dX = dx;
+      this.dY = dy;
       return [dx, dy];
     }
     printDirection(direction) {
@@ -336,16 +365,30 @@
     }
     Draw(map, ctx2) {
       const point = map.GetPoint(this.x, this.y);
-      const [dx, dy] = this.Move(map, this.x, this.y);
-      if (![0 /* EMPTY */, 1 /* HOUSE */].includes(point)) {
-        this.x += dx * this.velocity;
-        this.y += dy * this.velocity;
-        ctx2.fillStyle = "black";
-        ctx2.fillRect(this.x * map.length, this.y * map.length, 10, 10);
+      const before = map.GetPoint(this.x - this.dX / 2, this.y - this.dY / 2);
+      console.log(point, before);
+      if (before === 1 /* HOUSE */ || point === 0 /* EMPTY */) {
+        console.log("checking on house before");
+        this.is_correct = map.CheckHouse(this.x, this.y) === this.house_id;
+        this.ready = true;
         return;
       }
-      this.is_correct = map.CheckHouse(this.x, this.y) === this.house_id;
-      this.ready = true;
+      const [dx, dy] = this.Move(map, this.x, this.y);
+      this.x += dx * this.velocity;
+      this.y += dy * this.velocity;
+      this.renderOrb(this.x * map.length, this.y * map.length, this.length, this.length, ctx2);
+      return;
+    }
+    renderOrb(x, y, width, height, ctx2) {
+      ctx2.beginPath();
+      ctx2.fillStyle = "white";
+      ctx2.arc(x, y, height / 2, 0, 2 * Math.PI);
+      ctx2.fill();
+      ctx2.fillStyle = "black";
+      ctx2.textAlign = "center";
+      ctx2.font = "10px Arial";
+      ctx2.fillText(`${this.house_id}`, x, y);
+      ctx2.closePath();
     }
     // entonces como puedo definir hacia donde he de ir? hmmmm
     // aqui le paso el delta time de los fps 
@@ -391,7 +434,7 @@
       this.FPS = 60;
       this.frameDelay = 1e3 / 60;
       // tiempo mínimo entre frames en ms
-      this.spawnTrainTime = 1e4;
+      this.spawnTrainTime = 1e3;
       this.spawnTrainTimelapse = this.spawnTrainTime;
       this.correct_trains = 0;
       this.total_trains = 0;
@@ -400,8 +443,9 @@
     spawnTrain() {
       const spawners = this.gameMap.spawners;
       const random = Math.random() * spawners.length;
-      const spawner = spawners[Math.floor(random)];
-      const train = new Train(spawner[1], spawner[0], this.gameMap, Math.floor(Math.random() * this.gameMap.GetHousesLength()));
+      const [y, x] = spawners[Math.floor(random)];
+      console.log(y, x, spawners);
+      const train = new Train(x, y, this.gameMap, Math.floor(Math.random() * this.gameMap.GetHousesLength()));
       this.trains.push(train);
       console.log("TODO train spawn");
     }
@@ -416,6 +460,9 @@
       this.spawnTrainTimelapse -= deltaTime;
       if (this.spawnTrainTimelapse <= 0) {
         console.log("TODO: spawn trains every few seconds");
+        if (Math.random() < 0.5) {
+          this.spawnTrain();
+        }
         this.spawnTrainTimelapse = this.spawnTrainTime;
       }
       if (deltaTime >= this.frameDelay) {
