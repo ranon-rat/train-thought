@@ -17,7 +17,7 @@ const normal_map=[
     "----------------------",
     "----------------------",
     "----------------------",
-    "----------------------",
+    "------------------S---",
     "----------------------",
     "----------------------",
     "----------------------",
@@ -28,12 +28,12 @@ const map_string=[
     "----------------------",
     "---------H---H--------",
     "---------R---R--------",
-    "-----RRRRCRRRCRRRRS---",
+    "--HRRCRRRCRRRCRRRRS---",
     "-----R---R---R--------",
     "-----R---H---R-H------",
     "-----R-------R-R------",
     "-----H---HRRRCRCRRH---",
-    "----------------------",
+    "-------------H--------",
     "----------------------",
 ].join("\n")
 export class Game {
@@ -43,7 +43,7 @@ export class Game {
     private lastFrameTime: number = 0
     private readonly FPS = 60
     private readonly frameDelay = 1000 / 60 // tiempo mínimo entre frames en ms
-    private spawnTrainTime = 1000
+    private spawnTrainTime = 3000
     private spawnTrainTimelapse: number = this.spawnTrainTime
     correct_trains: number = 0
     total_trains: number = 0

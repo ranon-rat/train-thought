@@ -187,10 +187,6 @@
       ];
       const direction_before = around2.find((v) => v.v === before);
       const direction_next = around2.find((v) => v.v === next);
-      if (before !== next) {
-        this.DrawCircle(direction_before.x, direction_before.y, dx / 10, dy / 10, ctx2);
-        this.DrawCircle(direction_next.x, direction_next.y, dx / 10, dy / 10, ctx2);
-      }
       this.DrawLine(direction_before.x, direction_before.y, direction_next.x2, direction_next.y2, ctx2);
     }
     DrawCircle(x, y, dx, dy, ctx2) {
@@ -268,7 +264,7 @@
       this.length = 0;
       this.angle = 0;
       // per second that means 1000 milliseconds
-      this.initialVelocity = 1;
+      this.initialVelocity = 0.5;
       this.velocity = this.initialVelocity / 1e3;
       this.house_id = -1;
       this.is_correct = false;
@@ -425,12 +421,12 @@
     "----------------------",
     "---------H---H--------",
     "---------R---R--------",
-    "-----RRRRCRRRCRRRRS---",
+    "--HRRCRRRCRRRCRRRRS---",
     "-----R---R---R--------",
     "-----R---H---R-H------",
     "-----R-------R-R------",
     "-----H---HRRRCRCRRH---",
-    "----------------------",
+    "-------------H--------",
     "----------------------"
   ].join("\n");
   var Game = class {
@@ -441,7 +437,7 @@
       this.FPS = 60;
       this.frameDelay = 1e3 / 60;
       // tiempo mínimo entre frames en ms
-      this.spawnTrainTime = 1e3;
+      this.spawnTrainTime = 3e3;
       this.spawnTrainTimelapse = this.spawnTrainTime;
       this.correct_trains = 0;
       this.total_trains = 0;

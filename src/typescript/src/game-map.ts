@@ -210,10 +210,7 @@ export class GameMap {
 
         const direction_before = around.find(v => v.v === before)!
         const direction_next = around.find(v => v.v === next)!
-        if(before!==next){
-            this.DrawCircle(direction_before.x, direction_before.y, dx/10, dy/10, ctx)
-            this.DrawCircle(direction_next.x, direction_next.y, dx/10, dy/10, ctx)
-        }
+    
 
         this.DrawLine(direction_before.x, direction_before.y, direction_next.x2, direction_next.y2, ctx)
 
