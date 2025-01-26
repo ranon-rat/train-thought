@@ -1,5 +1,5 @@
 import { GameMap } from "./game-map"
-import { Direction, Kind } from "./types-enum-constants"
+import { colors, Direction, draw_circle, Kind } from "./types-enum-constants"
 export class Train {
     x: number = 0
     y: number = 0
@@ -135,7 +135,7 @@ export class Train {
     }
     renderOrb(x:number,y:number,width:number,height:number,ctx:CanvasRenderingContext2D){
         ctx.beginPath()
-        ctx.fillStyle = "white"
+        ctx.fillStyle = colors[this.house_id]
         ctx.arc(x,y,height/2,0,2*Math.PI)
         ctx.fill()
         ctx.fillStyle = "black"

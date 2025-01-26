@@ -1,15 +1,9 @@
-import { Kind, Direction, around } from "./types-enum-constants"
+import { Kind, Direction, around,colors,draw_circle } from "./types-enum-constants"
 function its_out_of_bounds(x:number,y:number,list:any[][]){
     if(y >= list.length || y < 0)return true    
     return x >= list[y].length || x < 0
 }
-function draw_circle(x:number,y:number,dx:number,dy:number,radious:number,ctx:CanvasRenderingContext2D,color:string){
-    ctx.beginPath()
-    ctx.fillStyle = color
-    ctx.arc(x * dx + dx / 2, y * dy + dy / 2, radious, 0, 2 * Math.PI)
-    ctx.fill()
-    ctx.closePath()
-}
+
 export class GameMap {
     level_design: Kind[][] = [
         [Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY, Kind.EMPTY],
@@ -23,6 +17,7 @@ export class GameMap {
     level_directions: Direction[][]
     level_before: Direction[][]
     changing_rails_directions: Direction[][][]
+    
     changing_rails_pos: number[][]
     houses_id:number[][]=[]
     houses_length:number=0
@@ -69,8 +64,9 @@ export class GameMap {
     DrawPart(x: number, y: number, dx: number, dy: number, kind: Kind, ctx: CanvasRenderingContext2D) {
         switch (kind) {
             case Kind.HOUSE:
-                draw_circle(x,y,dx,dy,dx/2,ctx,"rgb(150,150,150)")
-                draw_circle(x,y,dx,dy,dx/4,ctx,"white")
+                draw_circle(x,y,dx,dy,dx/2,ctx,"rgb(150,150,150)",0)
+
+                draw_circle(x,y,dx,dy,dx/4,ctx,colors[this.houses_id[y][x]],10)
                 ctx.fillStyle = "black"
                 ctx.textAlign = "center"
                 ctx.font = "10px Arial"

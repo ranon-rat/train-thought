@@ -7,18 +7,25 @@
     [0, -1, 1 /* LEFT */],
     [0, 1, 2 /* RIGHT */]
   ];
-
-  // src/typescript/src/game-map.ts
-  function its_out_of_bounds(x, y, list) {
-    if (y >= list.length || y < 0) return true;
-    return x >= list[y].length || x < 0;
-  }
-  function draw_circle(x, y, dx, dy, radious, ctx2, color) {
+  var colors = ["rgb(255,100,255)", "rgb(255,255,255)", "rgb(0,0,255)", "rgb(255,0,0)", "rgb(0,255,0)", "rgb(255,255,0)", "rgb(0,255,255)", "rgb(255,0,255)", "rgb(128,128,128)", "rgb(128,0,0)", "rgb(128,128,0)", "rgb(0,128,0)", "rgb(0,0,128)", "rgb(128,0,128)", "rgb(0,128,128)", "rgb(128,128,128)"];
+  function draw_circle(x, y, dx, dy, radious, ctx2, color, shadowBlur) {
+    const prev_shadow = ctx2.shadowColor;
+    const prev_glow = ctx2.shadowBlur;
+    ctx2.shadowColor = color;
+    ctx2.shadowBlur = shadowBlur;
     ctx2.beginPath();
     ctx2.fillStyle = color;
     ctx2.arc(x * dx + dx / 2, y * dy + dy / 2, radious, 0, 2 * Math.PI);
     ctx2.fill();
     ctx2.closePath();
+    ctx2.shadowColor = prev_shadow;
+    ctx2.shadowBlur = prev_glow;
+  }
+
+  // src/typescript/src/game-map.ts
+  function its_out_of_bounds(x, y, list) {
+    if (y >= list.length || y < 0) return true;
+    return x >= list[y].length || x < 0;
   }
   var GameMap = class {
     constructor(level_design) {
@@ -67,8 +74,8 @@
     DrawPart(x, y, dx, dy, kind, ctx2) {
       switch (kind) {
         case 1 /* HOUSE */:
-          draw_circle(x, y, dx, dy, dx / 2, ctx2, "rgb(150,150,150)");
-          draw_circle(x, y, dx, dy, dx / 4, ctx2, "white");
+          draw_circle(x, y, dx, dy, dx / 2, ctx2, "rgb(150,150,150)", 0);
+          draw_circle(x, y, dx, dy, dx / 4, ctx2, colors[this.houses_id[y][x]], 10);
           ctx2.fillStyle = "black";
           ctx2.textAlign = "center";
           ctx2.font = "10px Arial";
@@ -381,7 +388,7 @@
     }
     renderOrb(x, y, width, height, ctx2) {
       ctx2.beginPath();
-      ctx2.fillStyle = "white";
+      ctx2.fillStyle = colors[this.house_id];
       ctx2.arc(x, y, height / 2, 0, 2 * Math.PI);
       ctx2.fill();
       ctx2.fillStyle = "black";
@@ -416,14 +423,14 @@
   }
   var map_string = [
     "----------------------",
-    "--H------H------------",
-    "--R------R------------",
-    "--CRRRRRRCRRS---------",
-    "--R-------------------",
-    "--R-------------------",
-    "--R-------------------",
-    "--R-------------------",
-    "--H-------------------",
+    "---------H---H--------",
+    "---------R---R--------",
+    "-----RRRRCRRRCRRRRS---",
+    "-----R---R---R--------",
+    "-----R---H---R-H------",
+    "-----R-------R-R------",
+    "-----H---HRRRCRCRRH---",
+    "----------------------",
     "----------------------"
   ].join("\n");
   var Game = class {
