@@ -20,14 +20,15 @@ export class Train {
     // improving animations and events
     dX: number = 0
     dY: number = 0
+    length_ratio:number=2.1
     constructor(x: number, y: number, map: GameMap, house_id: number) {
-        this.length = map.GetLength() / 3
+        this.length = map.GetLength() / this.length_ratio
         this.y = (y + 0.5)
         this.x = (x + 0.5)
         this.house_id = house_id
     }
     resize(length: number) {
-        this.length = length / 3
+        this.length = length / this.length_ratio
     }
     Move(map: GameMap, x: number, y: number): [number, number] {
         let [x_l, y_l] = [x, y]

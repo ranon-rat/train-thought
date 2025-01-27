@@ -102,7 +102,7 @@ export class Game {
 
     }
     windowResize(canvas: HTMLCanvasElement) {
-        const width = Math.min(800, window.innerWidth)
+        const width = Math.min(900, window.innerWidth)
         const dx = width / this.gameMap.width
         this.gameMap.UpdateLength(dx)
         canvas.width = width
