@@ -96,7 +96,6 @@ export class Game {
                     this.game_over.draw(ctx, this.correct_trains, this.total_trains)
                     break
             }
-
             this.lastFrameTime = currentTime
 
         }

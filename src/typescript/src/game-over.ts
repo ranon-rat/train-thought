@@ -22,19 +22,18 @@ export class GameOver {
         ctx.fillStyle = "rgb(0,0,0)"
         ctx.fillRect(this.x, this.y, this.width, this.height)
         ctx.fillStyle = "rgb(255,255,255)"
+        ctx.font = "80px Arial"
+        ctx.fillText(`Game Over`,this.x+this.width/2,this.y )
         ctx.font = "10px Arial"
-        ctx.fillText(`Game Over`,this.x ,this.y )
-        ctx.fillText(`${correct_trains} of ${total_trains}`, this.x + this.width/2, this.y + this.height/2 + 40)
+        ctx.fillText(`${correct_trains} of ${total_trains}`, this.x + this.width/2, this.y + this.height/8 + 40)
         console.log("TODO add game over class")
         this.gameOverButton.draw(ctx)
     }
     resize(canvas:HTMLCanvasElement){
-
         this.width = canvas.width / this.ratio_width
         this.height = canvas.height / this.ratio_height
-        this.x = canvas.width/2 - this.width
-        this.y = canvas.height/2 - this.height
-        this.gameOverButton.update(this.x,this.y+this.height/2,this.width,this.height)
-       
+        this.x = canvas.width/2 - this.width/2
+        this.y = canvas.height/2 - this.height/2
+        this.gameOverButton.update(this.x+this.height/2,this.y+this.height/2,this.width/2,this.height/2.2)
     }
 }
