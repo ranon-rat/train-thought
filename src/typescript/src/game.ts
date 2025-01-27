@@ -1,55 +1,25 @@
 import { GameMap } from "./game-map"
 import { Train } from "./train"
 import { Kind } from "./types-enum-constants"
-function string2Map(map: string) {
-    return map.split("\n").map(line => line.split("").map(char => {
-        switch (char) {
-            case "H": return Kind.HOUSE
-            case "C": return Kind.CHANGING_RAIL
-            case "R": return Kind.RAIL
-            case "S": return Kind.SPAWNER
-            default: return Kind.EMPTY
-        }
-    }))
-}
-const normal_map=[
-    "----------------------",
-    "----------------------",
-    "----------------------",
-    "----------------------",
-    "----------------------",
-    "----------------------",
-    "----------------------",
-    "----------------------",
-    "----------------------",
-    "----------------------",
-]
-const map_string=[
-    "----------------------",
-    "---------H------------",
-    "---------R------------",
-    "--HRRCRRRCRRRCRRRRS---",
-    "-----R-------R--------",
-    "--HRRC---HRRRC-H------",
-    "-----R-------R-R------",
-    "-----H---HRRRCRCRRH---",
-    "----------------------",
-    "----------------------",
-].join("\n")
+import { first_map_string, string2Map } from "./maps"
+
+
+
+
 export class Game {
     gameMap: GameMap
     state = 1
     trains: Train[] = []
     private lastFrameTime: number = 0
     private readonly FPS = 60
-    private readonly frameDelay = 1000 / 60 // tiempo mínimo entre frames en ms
-    private spawnTrainTime = 3000
+    private readonly frameDelay = 1000 / 60 
+    private spawnTrainTime = 5000
     private spawnTrainTimelapse: number = this.spawnTrainTime
     correct_trains: number = 0
     total_trains: number = 0
 
     constructor() {
-        this.gameMap = new GameMap(string2Map(map_string))
+        this.gameMap = new GameMap(string2Map(first_map_string))
     }
     spawnTrain() {
         //  if (this.trains.length >= 10) { return }
@@ -72,17 +42,11 @@ export class Game {
         this.spawnTrainTimelapse -= deltaTime
 
         if (this.spawnTrainTimelapse <= 0) {
-            // TODO: spawn trains every few seconds
-            console.log("TODO: spawn trains every few seconds")
             if (Math.random() < 0.5) {
                 this.spawnTrain()
             }
             this.spawnTrainTimelapse = this.spawnTrainTime
-            //   this.spawnTrainTimelapse = this.spawnTrainTime
-            //   this.spawnTrain(0, 0)
-
         }
-
 
         if (deltaTime >= this.frameDelay) {
             this.trains.forEach(train => {
