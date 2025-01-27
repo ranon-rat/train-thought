@@ -5,8 +5,7 @@ import { Button } from "./buttons"
 import { SelectionMenu } from "./selection_menu"
 
 
-
-
+// i should add something for the game over
 export class Game {
     gameMap: GameMap
     state = 0
@@ -16,14 +15,25 @@ export class Game {
     private readonly frameDelay = 1000 / this.FPS
     private spawnTrainTime = 3500
     private spawnTrainTimelapse: number = this.spawnTrainTime
+    private readonly initial_time:number=1000*60*2// 2 minutes i guess that would be good 
+    private current_time:number=this.initial_time
+
     correct_trains: number = 0
     total_trains: number = 0
     play_button:Button
-    selection_menu:SelectionMenu    
+    selection_menu:SelectionMenu  
+    score_window_x:number=0
+    score_window_y:number=0
+    score_window_width:number=0
+    score_window_height:number=0
     constructor() {
         this.gameMap = new GameMap(first_map)
         this.play_button=new Button(100,50,100,100,"Play")
         this.selection_menu=new SelectionMenu(100,50)
+        this.score_window_x=100
+        this.score_window_y=100
+        this.score_window_width=50
+        this.score_window_height=50
     }
     spawnTrain() {
         //  if (this.trains.length >= 10) { return }
@@ -91,17 +101,39 @@ export class Game {
         await Promise.all(this.trains.map(async (train) => {
             await train.Draw(this.gameMap, ctx)
         }))
-        ctx.fillStyle = "rgb(255,255,255)"
+        // so we gotta draw the text of the score and shit
+        ctx.fillStyle="rgb(179, 177, 177)"
+        ctx.fillRect(this.score_window_x,this.score_window_y,this.score_window_width,this.score_window_height)
+        ctx.fillStyle="rgb(0,0,0)"
         ctx.font = "10px Arial"
-        ctx.textAlign = "center"
-        ctx.fillText(`${this.correct_trains}/${this.total_trains}`, canvas.width / 2, canvas.height / 2)
+        // it has to show the m:ss
+        const minutes=Math.floor(this.current_time/1000/60)
+        const seconds=Math.floor((this.current_time/1000)%60)
+        ctx.fillText(`${minutes}:${seconds}| ${this.correct_trains} of ${this.total_trains}`, this.score_window_x+this.score_window_width/2, this.score_window_y+this.score_window_height/2)
+        if(this.current_time<=0){
+            this.state=3
+        }
+        console.log("TODO add a gaming class for keeping this separate outside of the render loop to make it easier to manage")
+    }
+    async drawGameOver(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
+        const width=canvas.width/10
+        const height=canvas.height/10
+        ctx.fillStyle="rgb(0,0,0)"
+        ctx.fillRect(canvas.width/2-width/2 ,canvas.height/2-height/2,width,height)
+        ctx.fillStyle="rgb(255,255,255)"
+        ctx.font = "10px Arial"
+        ctx.fillText(`Game Over`, canvas.width/2-width/2, canvas.height/2-height/2+20)
+        ctx.fillText(`${this.correct_trains} of ${this.total_trains}`, canvas.width/2-width/2, canvas.height/2-height/2+40)
+        console.log("TODO add game over class")
     }
     async draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
 
         const currentTime = performance.now()
         const deltaTime = currentTime - this.lastFrameTime
-        this.spawnTrainTimelapse -= deltaTime
-        
+        if(this.state===2){            
+                this.spawnTrainTimelapse -= deltaTime
+                this.current_time-=deltaTime
+        }
         
         if (deltaTime >= this.frameDelay) {
            
@@ -115,6 +147,10 @@ export class Game {
                     break
                 case 2:
                     this.drawGame(canvas, ctx,deltaTime)
+                    break
+                case 3:
+                    this.drawGameOver(canvas, ctx)
+                    
                     break
             }
           
@@ -135,6 +171,12 @@ export class Game {
         this.trains.forEach(train => {
             train.resize(dx)
         })
+        this.score_window_width=canvas.width/10
+        this.score_window_height=canvas.height/10
+
+        this.score_window_x=canvas.width-this.score_window_width
+        this.score_window_y=0
+
 
     }
     click(e: MouseEvent, canvas: HTMLCanvasElement) {
@@ -154,9 +196,8 @@ export class Game {
                 const level=this.selection_menu.onClick(x,y)
                 if(level){
                     this.gameMap=new GameMap(level)
-                    this.gameMap.UpdateLength(canvas.width/this.gameMap.width)
+                    this.windowResize(canvas)
                     this.state=2
-
                 }
                 break
             case 2:// game
