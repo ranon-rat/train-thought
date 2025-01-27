@@ -17,7 +17,7 @@ export class Train {
     house_id: number = -1
     // this will keep the direciton that we set for the changing rail constant once it gets to that point.
     rotatingDirection: Direction = Direction.NEUTRAL
-    // this is just for
+    // improving animations and events
     dX: number = 0
     dY: number = 0
     constructor(x: number, y: number, map: GameMap, house_id: number) {
@@ -49,73 +49,63 @@ export class Train {
         next = this.rotatingDirection
 
         if (before !== next && before !== Direction.NEUTRAL) {
-            const vector = Math.SQRT1_2
-            const [to_go_UP, to_go_DOWN, to_go_LEFT, to_go_RIGHT] = [-vector, vector, -vector, vector]
-            switch (true) {
-                // viene de abajo va hacia arriba
-                case (before === Direction.DOWN && next === Direction.LEFT):
-                case (before === Direction.LEFT && next === Direction.DOWN):
-                    [dx, dy] = [to_go_LEFT, to_go_UP]
-                    break
-                // viene de al lado va hacia arriba
-                case (before === Direction.LEFT && next === Direction.UP):
-                case (before === Direction.UP && next === Direction.LEFT):
-                    [dx, dy] = [to_go_LEFT, to_go_DOWN]
-                    break
-                // viene de abajo va hacia arriba 
-                case (before === Direction.DOWN && next === Direction.RIGHT):
-                case (before === Direction.RIGHT && next === Direction.DOWN):
-                    [dx, dy] = [to_go_RIGHT, to_go_UP]
-                    break
-                // viene de arriba va hacia al abajo
-                case (before === Direction.UP && next === Direction.RIGHT):
-                case (before === Direction.RIGHT && next === Direction.UP): // okay this is ready
-                    [dx, dy] = [to_go_RIGHT, to_go_DOWN]
-                    break
-
-                default:
-                    [dx, dy] = this.getNextPosition(next)
-                    break
-            }
+            [dx, dy] = this.curveVector(before, next)
         } else {
             // Movimiento en línea recta
-            [dx, dy] = this.getNextPosition(next)
+            [dx, dy] = this.getDirectionVector(next)
             if (point !== Kind.CHANGING_RAIL) {
                 this.rotatingDirection = Direction.NEUTRAL
             }
         }
         if (point === Kind.HOUSE) {
-            [dx, dy] = this.getNextPosition(next);
-            console.log("here we are")
+            [dx, dy] = this.getDirectionVector(next);
         }
         this.dX = dx
         this.dY = dy
         return [dx, dy]
     }
-    printDirection(direction: Direction) {
-        switch (direction) {
-            case Direction.RIGHT: return "RIGHT"
-            case Direction.LEFT: return "LEFT"
-            case Direction.UP: return "UP"
-            case Direction.DOWN: return "DOWN"
-            default: return "NEUTRAL"
+    curveVector(before: Direction, next: Direction) {
+        const vector = Math.SQRT1_2
+
+        const [to_go_UP, to_go_DOWN, to_go_LEFT, to_go_RIGHT] = [-vector, vector, -vector, vector]
+        const curves: Record<string, [number, number]> = {
+            [`${Direction.DOWN}_${Direction.LEFT}`]: [to_go_LEFT, to_go_UP],
+            [`${Direction.LEFT}_${Direction.DOWN}`]: [to_go_LEFT, to_go_UP],
+            [`${Direction.LEFT}_${Direction.UP}`]: [to_go_LEFT, to_go_DOWN],
+            [`${Direction.UP}_${Direction.LEFT}`]: [to_go_LEFT, to_go_DOWN],
+            [`${Direction.DOWN}_${Direction.RIGHT}`]: [to_go_RIGHT, to_go_UP],
+            [`${Direction.RIGHT}_${Direction.DOWN}`]: [to_go_RIGHT, to_go_UP],
+            [`${Direction.UP}_${Direction.RIGHT}`]: [to_go_RIGHT, to_go_DOWN],
+            [`${Direction.RIGHT}_${Direction.UP}`]: [to_go_RIGHT, to_go_DOWN],
         }
+        const key = `${before}_${next}`
+        return curves[key] || this.getDirectionVector(next)
+    }
+
+    printDirection(direction: Direction) {
+        const directions: Record<Direction, string> = {
+            [Direction.RIGHT]: "RIGHT",
+            [Direction.LEFT]: "LEFT",
+            [Direction.UP]: "UP",
+            [Direction.DOWN]: "DOWN",
+            [Direction.NEUTRAL]: "NEUTRAL"
+        }
+        return directions[direction]
     }
 
     // x y 
-    private getNextPosition(direction: Direction): [number, number] {
-        switch (direction) {
-            case Direction.RIGHT: return [1, 0]
-            case Direction.LEFT: return [-1, 0]
-            case Direction.UP: return [0, 1]
-            case Direction.DOWN: return [0, -1]
-            default: return [0, 0]
-        }
+    private getDirectionVector(direction: Direction): [number, number] {
+        const vectors: Record<Direction, [number, number]> = {
+            [Direction.RIGHT]: [1, 0],
+            [Direction.LEFT]: [-1, 0],
+            [Direction.UP]: [0, 1],
+            [Direction.DOWN]: [0, -1],
+            [Direction.NEUTRAL]: [0, 0]
+        };
+        return vectors[direction]
     }
 
-    Draw(map: GameMap, ctx: CanvasRenderingContext2D) {
-        // Redondeamos las coordenadas para el cálculo del punto
-
+    async Draw(map: GameMap, ctx: CanvasRenderingContext2D) {
         const point = map.GetPoint(this.x, this.y)
         const before = map.GetPoint(this.x - this.dX / 2, this.y - this.dY / 2)
         if (before === Kind.HOUSE || point === Kind.EMPTY) {
@@ -123,25 +113,20 @@ export class Train {
             this.ready = true
             return
         }
-
         const [dx, dy] = this.Move(map, this.x, this.y)
         this.x += dx * this.velocity
         this.y += dy * this.velocity
         this.renderOrb(this.x * map.length, this.y * map.length, this.length, this.length, ctx)
-    
-
-        return
     }
     renderOrb(x: number, y: number, width: number, height: number, ctx: CanvasRenderingContext2D) {
-        draw_circle(x,y, height / 2, ctx, colors[this.house_id], 0)
+        draw_circle(x, y, height / 2, ctx, colors[this.house_id], 0)
         ctx.fillStyle = "black"
         ctx.textAlign = "center"
         ctx.font = "10px Arial"
-        ctx.fillText(`${this.house_id}`, x, y   )
+        ctx.fillText(`${this.house_id}`, x, y)
     }
 
-    // entonces como puedo definir hacia donde he de ir? hmmmm
-    // aqui le paso el delta time de los fps 
+  
     changeSpeed(time: number) {
         this.velocity = (this.initialVelocity) * (time / 1000)
     }

@@ -32,7 +32,8 @@ export class Game {
         console.log("TODO train spawn")
     }
     onKeyPress(e: KeyboardEvent) {
-        if (e.key === "s") {
+        const key=e.key.toLowerCase()
+        if (key === "s") {
             this.spawnTrain()
         }
     }
@@ -65,10 +66,9 @@ export class Game {
                 }
                 return !train.ready
             })
-            this.trains.forEach((train) => {
-                train.Draw(this.gameMap, ctx)
-
-            })
+            await Promise.all(this.trains.map(async (train) => {
+                await train.Draw(this.gameMap, ctx)
+            }))
             ctx.fillStyle = "rgb(255,255,255)"
             ctx.font = "10px Arial"
             ctx.textAlign = "center"
