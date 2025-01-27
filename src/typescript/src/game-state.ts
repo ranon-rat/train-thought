@@ -12,7 +12,7 @@ export class GameState {
     total_trains: number = 0
     correct_trains: number = 0
     score_window: scoreWindow
-    private readonly initial_time: number = 1000 //* 60 * 2// 2 minutes i guess that would be good 
+    private readonly initial_time: number = 1000 * 60 * 2// 2 minutes i guess that would be good 
 
     current_time: number = this.initial_time
 
@@ -47,8 +47,8 @@ export class GameState {
     checkTime() {
         return this.current_time <= 0
     }
-    onClick(x: number, y: number) {
-        return this.gameMap.Click(x, y, this.gameMap.width, this.gameMap.height)
+    onClick(x: number, y: number,width:number,height:number) {
+        this.gameMap.Click(x, y, width, height)
     }
     async updateSpeed(deltaTime: number) {
         this.trains.forEach(train => {

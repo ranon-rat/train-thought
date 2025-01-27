@@ -52,10 +52,8 @@ export class Game {
 
         const currentTime = performance.now()
         const deltaTime = currentTime - this.lastFrameTime
-        if (this.state === 2) {
-            if (this.game_state) {
-                this.game_state.decreaseTime(deltaTime)
-            }
+        if (this.state === 2 && this.game_state) {
+            this.game_state.decreaseTime(deltaTime)
         }
 
         if (deltaTime >= this.frameDelay) {
@@ -71,13 +69,11 @@ export class Game {
                     this.selection_menu.draw(ctx)
                     break
                 case 2:
-
                     if (!this.game_state) {
                         break
                     }
-                    
                     const dx = canvas.width / MAPS_WIDTH
-                    this.game_state.resize(canvas,dx)
+                    this.game_state.resize(canvas, dx)
                     this.game_state.updateSpeed(deltaTime)
                     this.game_state.draw(canvas, ctx)
                     if (this.game_state.checkTime()) {
@@ -136,9 +132,10 @@ export class Game {
                 }
                 break
             case 2:// game
-                if (this.game_state) {
-                    this.game_state.onClick(x, y)
-                }
+                if (!this.game_state) break
+                console.log("aaaaaa",x,y,canvas.height,canvas.width,x/canvas.width,y/canvas.height)
+                this.game_state.onClick(x, y, canvas.width, canvas.height)
+
                 break
             case 3:
                 if (this.game_over.onClick(x, y)) {
