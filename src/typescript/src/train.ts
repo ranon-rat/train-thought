@@ -9,7 +9,7 @@ export class Train {
     length: number = 0
     angle: number = 0
     // per second that means 1000 milliseconds
-    initialVelocity: number = 0.5
+    initialVelocity: number = 1
     velocity: number = this.initialVelocity / 1000
 
     house_id: number = -1

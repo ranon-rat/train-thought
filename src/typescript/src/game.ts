@@ -17,7 +17,7 @@ const normal_map=[
     "----------------------",
     "----------------------",
     "----------------------",
-    "------------------S---",
+    "----------------------",
     "----------------------",
     "----------------------",
     "----------------------",
@@ -26,14 +26,14 @@ const normal_map=[
 ]
 const map_string=[
     "----------------------",
-    "---------H---H--------",
-    "---------R---R--------",
+    "---------H------------",
+    "---------R------------",
     "--HRRCRRRCRRRCRRRRS---",
-    "-----R---R---R--------",
-    "-----R---H---R-H------",
+    "-----R-------R--------",
+    "--HRRC---HRRRC-H------",
     "-----R-------R-R------",
     "-----H---HRRRCRCRRH---",
-    "-------------H--------",
+    "----------------------",
     "----------------------",
 ].join("\n")
 export class Game {
@@ -93,9 +93,11 @@ export class Game {
             this.gameMap.Draw(canvas, ctx)
 
             this.trains = this.trains.filter(train => {
-                this.total_trains++
-                if (!train.is_correct) {
-                    this.correct_trains++
+                if (train.ready) {
+                    this.total_trains++
+                    if (train.is_correct) {
+                        this.correct_trains++
+                    }
                 }
                 return !train.ready
             })
@@ -103,6 +105,10 @@ export class Game {
                 train.Draw(this.gameMap, ctx)
 
             })
+            ctx.fillStyle = "rgb(255,255,255)"
+            ctx.font = "10px Arial"
+            ctx.textAlign = "center"
+            ctx.fillText(`${this.correct_trains}/${this.total_trains}`, canvas.width / 2, canvas.height / 2)
             this.lastFrameTime = currentTime
 
         }
