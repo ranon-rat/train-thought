@@ -7,7 +7,7 @@ export class Button{
     y:number
     content:string
     color:string
-    constructor(width:number,height:number,x:number,y:number,content:string,color:string="white"){
+    constructor(x:number,y:number,width:number,height:number,content:string,color:string="white"){
         this.width=width
         this.height=height
         this.x=x

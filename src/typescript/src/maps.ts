@@ -74,3 +74,4 @@ export const third_map=string2Map([
 
 ].join("\n").toUpperCase())
 
+export const [MAPS_WIDTH,MAPS_HEIGHT]=[22,12]
