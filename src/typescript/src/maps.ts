@@ -7,9 +7,10 @@ export function string2Map(map: string) {
             case "R": return Kind.RAIL
             case "S": return Kind.SPAWNER
             default: return Kind.EMPTY
-        }
+            }
     }))
 }
+// use this as a base
 export const normal_map=[
     "----------------------",
     "----------------------",
@@ -25,7 +26,7 @@ export const normal_map=[
     "----------------------",
 
 ]
-export const first_map_string=[
+export const first_map=string2Map([
     "----------------------",
     "---------H------------",
     "---------R------------",
@@ -39,8 +40,8 @@ export const first_map_string=[
     "----------------------",
     "----------------------",
 
-].join("\n")
-export const second_map_string=[
+].join("\n").toUpperCase())
+export const second_map=string2Map([
     "----------------------",
     "-------S--HRRRCRRH----",
     "-------R------R-------",
@@ -55,21 +56,21 @@ export const second_map_string=[
     "----------------------",
 
 
-].join("\n")
+].join("\n").toUpperCase())
 
-export const third_map_string=[
+export const third_map=string2Map([
     "----------------------",
     "-----HRRRCRRRCRRRH----",
     "---------R---R--------",
     "---------R---R--------",
-    "------HRRC-HRCRRS-----",
-    "---------R------------",
-    "------H--RR---H-------",
-    "------R---RR--R-------",
-    "------RRRR-RRRC-------",
-    "---------R----R-------",
+    "-HRRCRRRRC-HRCRRCRRS--",
+    "----R----R------R-----",
+    "----R-H--RR---H-R-----",
+    "-HRRC-R---RR--R-RRRH--",
+    "----R-RRRR-RRRC-------",
+    "-HRRR----R----R-------",
     "------HRRCRRRRCRRH----",
     "----------------------",
 
-].join("\n").toUpperCase()
+].join("\n").toUpperCase())
 
