@@ -10,9 +10,8 @@ export class SelectionMenu{
     // the height and width of the canvas
     height:number
     width:number
-    // 
+    // the levels
     levels:Kind[][][]=[]
-
     constructor(height:number,width:number){
         this.height=height
         this.width=width

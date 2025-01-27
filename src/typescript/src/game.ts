@@ -122,6 +122,10 @@ export class Game {
         ctx.fillText(`${minutes}:${seconds}| ${this.correct_trains} of ${this.total_trains}`, this.score_window_x + this.score_window_width / 2, this.score_window_y + this.score_window_height / 2)
         if (this.current_time <= 0) {
             this.state = 3
+            this.current_time=this.initial_time
+            this.trains=[]
+            this.total_trains=0
+            this.correct_trains=0
         }
         console.log("TODO add a gaming class for keeping this separate outside of the render loop to make it easier to manage")
     }
