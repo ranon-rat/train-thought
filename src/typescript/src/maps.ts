@@ -43,7 +43,7 @@ export const first_map=string2Map([
 ].join("\n").toUpperCase())
 export const second_map=string2Map([
     "----------------------",
-    "-------S--HRRRCRRH----",
+    "-SRRRRRR--HRRRCRRH----",
     "-------R------R-------",
     "---HRCRCRRRCRRCRRRH---",
     "-----R-----R----------",
