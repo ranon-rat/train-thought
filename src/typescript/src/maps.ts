@@ -1,5 +1,4 @@
 import { Kind } from "./types-enum-constants"
-
 export function string2Map(map: string) {
     return map.split("\n").map(line => line.split("").map(char => {
         switch (char) {
@@ -11,7 +10,6 @@ export function string2Map(map: string) {
         }
     }))
 }
-
 export const normal_map=[
     "----------------------",
     "----------------------",
@@ -64,6 +62,7 @@ export const third_map_string=[
     "----------------------",
     "----------------------",
     "----------------------",
+    "-----------HRRRRS-----",
     "----------------------",
     "----------------------",
     "----------------------",
@@ -73,3 +72,4 @@ export const third_map_string=[
     "----------------------",
 
 ].join("\n")
+

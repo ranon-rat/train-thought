@@ -60,6 +60,7 @@ export class Train {
         if (point === Kind.HOUSE) {
             [dx, dy] = this.getDirectionVector(next);
         }
+        
         this.dX = dx
         this.dY = dy
         return [dx, dy]
@@ -114,6 +115,14 @@ export class Train {
             return
         }
         const [dx, dy] = this.Move(map, this.x, this.y)
+        // with this we correct the path if we go down a curve
+        // its necessary because the train its in a grid its not moving like if it was a 
+        // moving in an array(well kinda) but its not fixed and its constantly moving and so
+        // its important we correct the path
+        if (dx !== 0 || dy !== 0) {
+            this.x=dx===0?Math.floor(this.x)+0.5:this.x
+            this.y=dy===0?Math.floor(this.y)+0.5:this.y
+        }
         this.x += dx * this.velocity
         this.y += dy * this.velocity
         this.renderOrb(this.x * map.length, this.y * map.length, this.length, this.length, ctx)
@@ -126,7 +135,7 @@ export class Train {
         ctx.fillText(`${this.house_id}`, x, y)
     }
 
-  
+
     changeSpeed(time: number) {
         this.velocity = (this.initialVelocity) * (time / 1000)
     }
