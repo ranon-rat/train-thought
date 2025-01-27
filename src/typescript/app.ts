@@ -12,6 +12,6 @@ canvas.addEventListener("click", (e) => {
     game.click(e,canvas)
 })
 window.addEventListener("keydown", (e) => {
-    game.onKeyPress(e)
+    game.onKeyPress(e,canvas)
 })
 game.draw(canvas,ctx)

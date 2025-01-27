@@ -1,7 +1,6 @@
 import { GameMap } from "./game-map"
 import { Train } from "./train"
-import { Kind } from "./types-enum-constants"
-import { first_map_string, string2Map } from "./maps"
+import { first_map_string, string2Map ,second_map_string,third_map_string} from "./maps"
 
 
 
@@ -31,10 +30,32 @@ export class Game {
         this.trains.push(train)
         console.log("TODO train spawn")
     }
-    onKeyPress(e: KeyboardEvent) {
+    onKeyPress(e: KeyboardEvent,canvas:HTMLCanvasElement) {
         const key=e.key.toLowerCase()
         if (key === "s") {
             this.spawnTrain()
+        }
+        if (key === "1") {
+            this.gameMap = new GameMap(string2Map(first_map_string))
+            this.windowResize(canvas)
+            this.trains = []
+            this.total_trains = 0
+            this.correct_trains = 0
+
+        }
+        if (key === "2") {
+            this.gameMap = new GameMap(string2Map(second_map_string))
+            this.windowResize(canvas)
+            this.trains = []
+            this.total_trains = 0
+            this.correct_trains = 0
+        }
+        if (key === "3") {
+            this.gameMap = new GameMap(string2Map(third_map_string))
+            this.windowResize(canvas)
+            this.trains = []
+            this.total_trains = 0
+            this.correct_trains = 0
         }
     }
     async draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
