@@ -4,19 +4,20 @@ export class Train {
     x: number = 0
     y: number = 0
 
-    // con esto lo preprao para eliminarlo
-    ready: boolean = false // con este el tren muere
+
     length: number = 0
     angle: number = 0
     // per second that means 1000 milliseconds
     initialVelocity: number = 1
     velocity: number = this.initialVelocity / 1000
 
-    house_id: number = -1
+    // con esto lo preprao para eliminarlo
+    ready: boolean = false // con este el tren muere
     is_correct: boolean = false
-
+    house_id: number = -1
+    // this will keep the direciton that we set for the changing rail constant once it gets to that point.
     rotatingDirection: Direction = Direction.NEUTRAL
-
+    // this is just for
     dX: number = 0
     dY: number = 0
     constructor(x: number, y: number, map: GameMap, house_id: number) {
@@ -29,10 +30,10 @@ export class Train {
         this.length = length / 3
     }
     Move(map: GameMap, x: number, y: number): [number, number] {
-        let [x_l,y_l] = [x,y]
+        let [x_l, y_l] = [x, y]
         let point = map.GetPoint(x, y)
         if (point === Kind.HOUSE) {
-            [x_l,y_l] = [x_l-this.dX/2,y_l-this.dY/2]
+            [x_l, y_l] = [x_l - this.dX / 2, y_l - this.dY / 2]
         }
         const before = map.GetBefore(x_l, y_l)
         let next = map.GetDirection(x_l, y_l)
@@ -42,12 +43,12 @@ export class Train {
             return [dx, dy]
         }
         if (this.rotatingDirection === Direction.NEUTRAL || point !== Kind.CHANGING_RAIL) {
+            console.log(this.printDirection(before), this.printDirection(next));
             this.rotatingDirection = next
         }
         next = this.rotatingDirection
 
         if (before !== next && before !== Direction.NEUTRAL) {
-            //console.log(this.printDirection(before), this.printDirection(next));
             const vector = Math.SQRT1_2
             const [to_go_UP, to_go_DOWN, to_go_LEFT, to_go_RIGHT] = [-vector, vector, -vector, vector]
             switch (true) {
@@ -84,7 +85,7 @@ export class Train {
             }
         }
         if (point === Kind.HOUSE) {
-            [dx, dy] = this.getNextPosition(before);
+            [dx, dy] = this.getNextPosition(next);
             console.log("here we are")
         }
         this.dX = dx
@@ -117,32 +118,26 @@ export class Train {
 
         const point = map.GetPoint(this.x, this.y)
         const before = map.GetPoint(this.x - this.dX / 2, this.y - this.dY / 2)
-        console.log(point, before)
         if (before === Kind.HOUSE || point === Kind.EMPTY) {
-            console.log("checking on house before")
             this.is_correct = map.CheckHouse(this.x, this.y) === this.house_id
             this.ready = true
             return
         }
 
-        // Actualizamos posición con precisión fija
         const [dx, dy] = this.Move(map, this.x, this.y)
         this.x += dx * this.velocity
         this.y += dy * this.velocity
-        this.renderOrb(this.x*map.length,this.y*map.length,this.length,this.length,ctx)
+        this.renderOrb(this.x * map.length, this.y * map.length, this.length, this.length, ctx)
     
+
         return
     }
-    renderOrb(x:number,y:number,width:number,height:number,ctx:CanvasRenderingContext2D){
-        ctx.beginPath()
-        ctx.fillStyle = colors[this.house_id]
-        ctx.arc(x,y,height/2,0,2*Math.PI)
-        ctx.fill()
+    renderOrb(x: number, y: number, width: number, height: number, ctx: CanvasRenderingContext2D) {
+        draw_circle(x,y, height / 2, ctx, colors[this.house_id], 0)
         ctx.fillStyle = "black"
         ctx.textAlign = "center"
         ctx.font = "10px Arial"
-        ctx.fillText(`${this.house_id}`,x,y)
-        ctx.closePath()
+        ctx.fillText(`${this.house_id}`, x, y   )
     }
 
     // entonces como puedo definir hacia donde he de ir? hmmmm

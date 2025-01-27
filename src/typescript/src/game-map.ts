@@ -61,9 +61,9 @@ export class GameMap {
     DrawPart(x: number, y: number, dx: number, dy: number, kind: Kind, ctx: CanvasRenderingContext2D) {
         switch (kind) {
             case Kind.HOUSE:
-                draw_circle(x, y, dx, dy, dx / 2, ctx, "rgb(255,255,255)", 0)
+                draw_circle(x*dx+dx/2, y*dy+dy/2, this.length / 2, ctx, "rgb(255,255,255)", 0)
 
-                draw_circle(x, y, dx, dy, dx / 4, ctx, colors[this.houses_id[y][x]], 10)
+                draw_circle(x*dx+dx/2, y*dy+dy/2, this.length / 4, ctx, colors[this.houses_id[y][x]], 10)
                 ctx.fillStyle = "black"
                 ctx.textAlign = "center"
                 ctx.font = "10px Arial"
@@ -71,8 +71,8 @@ export class GameMap {
                 //  ctx.fillText(`${this.houses_id[y][x]}`,x * dx + dx / 2, y * dy + dy / 2);
                 break
             case Kind.CHANGING_RAIL:
-                draw_circle(x, y, dx, dy, dx / 2+dx/8, ctx, "rgb(171, 255, 241,0.5)", 0)
-                draw_circle(x, y, dx, dy, dx / 4, ctx, "rgb(0,0,0,0.5)", 10)
+                draw_circle(x*dx+dx/2, y*dy+dy/2, this.length / 2, ctx, "rgb(171, 255, 241,0.5)", 0)
+                draw_circle(x*dx+dx/2, y*dy+dy/2, this.length / 4, ctx, "rgb(0,0,0,0.5)", 10)
                 break
             case Kind.SPAWNER:
                 ctx.fillStyle = "rgb(0,0,255)"

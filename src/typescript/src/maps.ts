@@ -1,4 +1,3 @@
-
 import { Kind } from "./types-enum-constants"
 
 export function string2Map(map: string) {
