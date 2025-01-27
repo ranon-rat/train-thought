@@ -54,8 +54,6 @@ export const second_map=string2Map([
     "----------------------",
     "----------------------",
     "----------------------",
-
-
 ].join("\n").toUpperCase())
 
 export const third_map=string2Map([

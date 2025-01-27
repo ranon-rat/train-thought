@@ -29,13 +29,13 @@ export class SelectionMenu {
         const button_width = this.width / this.buttons_per_row
         const button_height = this.height / this.buttons_per_row
         for (let i = 0; i < this.levels.length; i++) {
-            this.buttons[i].update(i * button_width, 0, button_width, button_height)
+            this.buttons[i].update(i * button_width,Math.floor(i/4) *button_height, button_width, button_height)
         }
     }
     onClick(x: number, y: number): Kind[][] {
         console.log("clicked")
         for (let i = 0; i < this.buttons.length; i++) {
-            if (!this.buttons[i].isPressed(x, y)) {
+            if (this.buttons[i].isPressed(x, y)) {
                 return this.levels[i]
             }
         }

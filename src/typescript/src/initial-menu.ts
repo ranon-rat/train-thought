@@ -5,12 +5,12 @@ export class InitialMenu {
     canvas_height_ratio: number = 8;
     canvas_width_ratio: number = 8;
 
-    constructor(height: number, width: number) {
+    constructor( width: number,height: number) {
         this.play_button = new Button(
-            height / 2,
             width / 2,
-            height / this.canvas_height_ratio,
+            height / 2,
             width / this.canvas_width_ratio,
+            height / this.canvas_height_ratio,
             "Play");
     }
     onClick(x: number, y: number) {
@@ -23,8 +23,8 @@ export class InitialMenu {
     resize(canvas: HTMLCanvasElement) {
         const width = canvas.width;
         const height = canvas.height;
-        const play_button_width = height / this.canvas_height_ratio;
-        const play_button_height = width / this.canvas_width_ratio;
+        const play_button_width = width / this.canvas_width_ratio;
+        const play_button_height = height / this.canvas_height_ratio; 
         this.play_button.update(
             width / 2 - play_button_width / 2,
             height / 2 - play_button_height / 2,
