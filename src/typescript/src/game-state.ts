@@ -57,9 +57,8 @@ export class GameState {
     }
     async draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D,) {
         if (this.spawnTrainTimelapse <= 0) {
-            if (Math.random() < 0.5) {
                 this.spawnTrain()
-            }
+            
             this.spawnTrainTimelapse = this.spawnTrainTime
         }
         this.gameMap.Draw(canvas, ctx)

@@ -129,11 +129,7 @@ export class Train {
         this.renderOrb(this.x * map.length, this.y * map.length, this.length, this.length, ctx)
     }
     renderOrb(x: number, y: number, width: number, height: number, ctx: CanvasRenderingContext2D) {
-        draw_circle(x, y, height / 2, ctx, colors[this.house_id], 0)
-        ctx.fillStyle = "black"
-        ctx.textAlign = "center"
-        ctx.font = "10px Arial"
-        ctx.fillText(`${this.house_id}`, x, y)
+        draw_circle(x, y, height / 2, ctx, colors[this.house_id], 20)
     }
 
 
