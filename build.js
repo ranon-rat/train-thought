@@ -1,5 +1,6 @@
 
 const esbuild = require("esbuild");
+const isWatch = process.argv[2] === "watch";
 async function watch() {
   let ctx = await esbuild.context({
     entryPoints: ["./src/typescript/app.ts"],
@@ -8,8 +9,16 @@ async function watch() {
     bundle: true,
     loader: { ".ts": "ts" },
   });
-  await ctx.watch();
-  console.log('Watching...');
+  if (isWatch) {
+    await ctx.watch();
+    console.log('Watching...');
+  } else {
+    await ctx.rebuild();
+
+    console.log('Building...');
+    await ctx.dispose(); // Liberamos recursos cuando no estamos en modo watch
+
+  }
 }
 
 watch();
