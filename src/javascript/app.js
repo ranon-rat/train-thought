@@ -325,11 +325,7 @@
       this.renderOrb(this.x * map.length, this.y * map.length, this.length, this.length, ctx2);
     }
     renderOrb(x, y, width, height, ctx2) {
-      draw_circle(x, y, height / 2, ctx2, colors[this.house_id], 0);
-      ctx2.fillStyle = "black";
-      ctx2.textAlign = "center";
-      ctx2.font = "10px Arial";
-      ctx2.fillText(`${this.house_id}`, x, y);
+      draw_circle(x, y, height / 2, ctx2, colors[this.house_id], 20);
     }
     changeSpeed(time) {
       this.velocity = this.initialVelocity * (time / 1e3);
@@ -491,6 +487,11 @@
       ];
       const direction_before = around2.find((v) => v.v === before);
       const direction_next = around2.find((v) => v.v === next);
+      const changing_rails_positions = this.changing_rails_directions[y][x].filter((_, i) => i !== this.changing_rails_pos[y][x]);
+      for (let c of changing_rails_positions) {
+        let direction_changing_rails = around2.find((v) => v.v === c);
+        DrawLineColor(direction_before.x, direction_before.y, direction_changing_rails.x2, direction_changing_rails.y2, ctx2, "rgba(255, 255, 255, 0.23)", 15);
+      }
       this.DrawLine(direction_before.x, direction_before.y, direction_next.x2, direction_next.y2, ctx2);
     }
     DrawLine(x1, y1, x2, y2, ctx2) {
@@ -604,9 +605,7 @@
     }
     async draw(canvas2, ctx2) {
       if (this.spawnTrainTimelapse <= 0) {
-        if (Math.random() < 0.5) {
-          this.spawnTrain();
-        }
+        this.spawnTrain();
         this.spawnTrainTimelapse = this.spawnTrainTime;
       }
       this.gameMap.Draw(canvas2, ctx2);
@@ -702,7 +701,6 @@
         this.game_state.decreaseTime(deltaTime);
       }
       if (deltaTime >= this.frameDelay) {
-        ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
         switch (this.state) {
           case 0:
             this.menu.resize(canvas2);
@@ -716,6 +714,7 @@
             if (!this.game_state) {
               break;
             }
+            ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
             const dx = canvas2.width / MAPS_WIDTH;
             this.game_state.resize(canvas2, dx);
             this.game_state.updateSpeed(deltaTime);
@@ -751,7 +750,7 @@
         this.game_state.resize(canvas2, dx);
       }
     }
-    click(e, canvas2) {
+    click(e, canvas2, ctx2) {
       const rect = canvas2.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
@@ -759,6 +758,7 @@
         case 0:
           if (this.menu.onClick(x, y)) {
             this.state = 1;
+            ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
           }
           break;
         case 1:
@@ -767,16 +767,17 @@
             this.game_state = new GameState(level);
             this.windowResize(canvas2);
             this.state = 2;
+            ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
           }
           break;
         case 2:
           if (!this.game_state) break;
-          console.log("aaaaaa", x, y, canvas2.height, canvas2.width, x / canvas2.width, y / canvas2.height);
           this.game_state.onClick(x, y, canvas2.width, canvas2.height);
           break;
         case 3:
           if (this.game_over.onClick(x, y)) {
             this.state = 1;
+            ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
           }
           break;
         default:
@@ -796,11 +797,10 @@
     game.windowResize(canvas);
   });
   canvas.addEventListener("click", (e) => {
-    game.click(e, canvas);
+    game.click(e, canvas, ctx);
   });
   window.addEventListener("keydown", (e) => {
     game.onKeyPress(e, canvas);
   });
-  console.log("SSSSSSSSSSSSSS");
   game.draw(canvas, ctx);
 })();
