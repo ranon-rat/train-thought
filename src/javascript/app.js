@@ -804,3 +804,4 @@
   });
   game.draw(canvas, ctx);
 })();
+
