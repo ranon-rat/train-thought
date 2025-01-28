@@ -199,7 +199,7 @@ export class GameMap {
         for(let c of changing_rails_positions){
             let direction_changing_rails=around.find(v=>v.v===c)!
 
-            DrawLineColor(direction_before.x, direction_before.y, direction_changing_rails.x2, direction_changing_rails.y2, ctx, "rgba(255, 255, 255, 0.53)", 15)
+            DrawLineColor(direction_before.x, direction_before.y, direction_changing_rails.x2, direction_changing_rails.y2, ctx, "rgba(255, 255, 255, 0.23)", 15)
 
         }
 
