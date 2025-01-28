@@ -58,7 +58,6 @@ export class Game {
 
         if (deltaTime >= this.frameDelay) {
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height)
             switch (this.state) {
                 case 0:
                     this.menu.resize(canvas)
@@ -72,6 +71,8 @@ export class Game {
                     if (!this.game_state) {
                         break
                     }
+                    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
                     const dx = canvas.width / MAPS_WIDTH
                     this.game_state.resize(canvas, dx)
                     this.game_state.updateSpeed(deltaTime)
@@ -111,7 +112,7 @@ export class Game {
             this.game_state.resize(canvas, dx)
         }
     }
-    click(e: MouseEvent, canvas: HTMLCanvasElement) {
+    click(e: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
         const rect = canvas.getBoundingClientRect()
         const x = e.clientX - rect.left
         const y = e.clientY - rect.top
@@ -119,27 +120,36 @@ export class Game {
             case 0:
                 // Todo Add Menu 
                 if (this.menu.onClick(x, y)) {
+
                     this.state = 1
+                    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
                 }
+
+
                 break
             case 1:
                 // add level selection
                 const level = this.selection_menu.onClick(x, y)
                 if (level) {
+
                     this.game_state = new GameState(level)
                     this.windowResize(canvas)
                     this.state = 2
+                    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
                 }
                 break
             case 2:// game
                 if (!this.game_state) break
-                console.log("aaaaaa",x,y,canvas.height,canvas.width,x/canvas.width,y/canvas.height)
                 this.game_state.onClick(x, y, canvas.width, canvas.height)
 
                 break
             case 3:
                 if (this.game_over.onClick(x, y)) {
                     this.state = 1
+                    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
                 }
                 break
             default:
