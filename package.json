@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "dev":"node ./build.js watch",
-    "build": "node ./build.js",
+    "dev-before anything":"node ./build.js watch",
+    "so-remember-build": "node ./build.js",
     "server":"python -m http.server 8080"
   },
   "devDependencies": {
