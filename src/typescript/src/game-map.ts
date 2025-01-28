@@ -195,7 +195,13 @@ export class GameMap {
 
         const direction_before = around.find(v => v.v === before)!
         const direction_next = around.find(v => v.v === next)!
+        const changing_rails_positions= this.changing_rails_directions[y][x].filter((_,i)=>i!==this.changing_rails_pos[y][x])
+        for(let c of changing_rails_positions){
+            let direction_changing_rails=around.find(v=>v.v===c)!
 
+            DrawLineColor(direction_before.x, direction_before.y, direction_changing_rails.x2, direction_changing_rails.y2, ctx, "rgba(255, 255, 255, 0.53)", 15)
+
+        }
 
         this.DrawLine(direction_before.x, direction_before.y, direction_next.x2, direction_next.y2, ctx)
 
