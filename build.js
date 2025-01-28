@@ -3,9 +3,9 @@ const esbuild = require("esbuild");
 const isWatch = process.argv[2] === "watch";
 async function watch() {
   let ctx = await esbuild.context({
-    entryPoints: ["./src/typescript/app.ts"],
+    entryPoints: ["./public/typescript/app.ts"],
     minify: false,
-    outfile: "./src/javascript/app.js",
+    outfile: "./public/javascript/app.js",
     bundle: true,
     loader: { ".ts": "ts" },
   });
