@@ -58,6 +58,8 @@ export class Game {
 
             switch (this.state) {
                 case 0:
+                    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
                     this.menu.resize(canvas)
                     this.menu.draw(ctx)
                     break
@@ -74,7 +76,7 @@ export class Game {
                     const dx = canvas.width / MAPS_WIDTH
                     this.game_state.resize(canvas, dx)
                     this.game_state.updateSpeed(deltaTime)
-                    this.game_state.draw(canvas, ctx)
+                    this.game_state.draw(ctx)
                     if (this.game_state.checkTime()) {
                         this.state = 3
                     }
@@ -128,6 +130,7 @@ export class Game {
                 break
             case 1:
                 // add level selection
+
                 const level = this.selection_menu.onClick(x, y)
                 if (level) {
 

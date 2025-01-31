@@ -12,14 +12,16 @@ export class GameState {
     total_trains: number = 0
     correct_trains: number = 0
     score_window: scoreWindow
+    score_window_yes: boolean
     private readonly initial_time: number = 1000 * 60 * 2// 2 minutes i guess that would be good 
 
     current_time: number = this.initial_time
 
 
-    constructor(level: Kind[][], canvas: HTMLCanvasElement) {
+    constructor(level: Kind[][], canvas: HTMLCanvasElement, score_window_yes: boolean = true) {
         this.score = 0;
         this.gameMap = new GameMap(level)
+        this.score_window_yes = score_window_yes
         this.score_window = new scoreWindow(canvas)
     }
     resize(canvas: HTMLCanvasElement, dx: number) {
@@ -55,13 +57,13 @@ export class GameState {
             train.changeSpeed(deltaTime)
         })
     }
-    async draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D,) {
+    async draw(ctx: CanvasRenderingContext2D,) {
         if (this.spawnTrainTimelapse <= 0) {
             this.spawnTrain()
 
             this.spawnTrainTimelapse = this.spawnTrainTime
         }
-        this.gameMap.Draw(canvas, ctx)
+        this.gameMap.Draw(ctx)
         this.trains = this.trains.filter(train => {
             if (train.ready) {
                 this.total_trains++
@@ -75,6 +77,8 @@ export class GameState {
             await train.Draw(this.gameMap, ctx)
         }))
         // so we gotta draw the text of the score and shit
-        this.score_window.draw(ctx, this.current_time, this.correct_trains, this.total_trains)
+        if (this.score_window_yes) {
+            this.score_window.draw(ctx, this.current_time, this.correct_trains, this.total_trains)
+        }
     }
 }

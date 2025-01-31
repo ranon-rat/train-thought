@@ -26,6 +26,20 @@ export const normal_map = [
     "----------------------",
 
 ]
+export const cool_map_for_menu = string2Map([
+    "----------------------",
+    "-RRRRRR-RRRRRRRRRRRRS-",
+    "-R----R-R-------------",
+    "-RRRR-R-R-RRRRRR-RRR--",
+    "----R-R-R-R----R-R-R--",
+    "-RRRR-R-R-RRRR-R-R-R--",
+    "-R----R-R----R-R-R-R--",
+    "-RRRR-R-RRRRRR-R-R-R--",
+    "----R-R--------RRR-R--",
+    "-HRRR-RRRRRRRR-----R--",
+    "-------------RRRRRRR--",
+    "----------------------",
+].join("\n"))
 export const first_map = string2Map([
     "----------------------",
     "---------H------------",

@@ -41,7 +41,7 @@ export class GameMap {
         // so with this we make everything that is needed
         this.SetupMap()
     }
-    async Draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
+    async Draw(ctx: CanvasRenderingContext2D) {
         const dx = this.length
         const dy = this.length
         const promises: Promise<void>[] = []

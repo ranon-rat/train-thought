@@ -1,12 +1,16 @@
 import { Button } from "./buttons";
-import { MAX_WIDTH, MAX_HEIGHT } from "./const";
+import { MAX_WIDTH, MAX_HEIGHT, MAPS_WIDTH } from "./const";
+import { GameState } from "./game-state";
+import { cool_map_for_menu } from "./maps";
 
 export class InitialMenu {
     play_button: Button
     canvas_height_ratio: number = 8;
     canvas_width_ratio: number = 8;
+    game_state: GameState
 
     constructor(canvas: HTMLCanvasElement) {
+        this.game_state = new GameState(cool_map_for_menu, canvas, false)
         this.play_button = new Button(
             MAX_WIDTH / 2,
             MAX_HEIGHT / 2,
@@ -18,10 +22,18 @@ export class InitialMenu {
         return this.play_button.isPressed(x, y);
     }
     draw(ctx: CanvasRenderingContext2D) {
+        this.game_state.draw(ctx)
         this.play_button.draw(ctx);
 
     }
+    async updateSpeed(deltaTime: number) {
+        this.game_state.updateSpeed(deltaTime)
+    }
+
     resize(canvas: HTMLCanvasElement) {
+        const width = Math.min(MAX_WIDTH, window.innerWidth)
+        const dx = width / MAPS_WIDTH
+        this.game_state.resize(canvas, dx)
         this.play_button.resize(canvas)
     }
 }
