@@ -1,42 +1,6 @@
 "use strict";
 (() => {
-  // src/typescript/src/buttons.ts
-  var Button = class {
-    constructor(x, y, width, height, content, color = "white") {
-      this.width = width;
-      this.height = height;
-      this.x = x;
-      this.y = y;
-      this.content = content;
-      this.color = color;
-    }
-    update(x, y, width, height) {
-      this.x = x;
-      this.y = y;
-      this.width = width;
-      this.height = height;
-    }
-    isPressed(x, y) {
-      return x >= this.x && x <= this.x + this.width && y >= this.y && y <= this.y + this.height;
-    }
-    draw(ctx2) {
-      ctx2.fillStyle = this.color;
-      ctx2.fillRect(this.x, this.y, this.width, this.height);
-      ctx2.fillStyle = "black";
-      ctx2.font = "20px Arial";
-      ctx2.textAlign = "center";
-      ctx2.fillText(this.content, this.x + this.width / 2, this.y + this.height / 2 + 10);
-    }
-  };
-
   // src/typescript/src/types-enum-constants.ts
-  var around = [
-    [1, 0, 3 /* UP */],
-    [-1, 0, 4 /* DOWN */],
-    [0, -1, 1 /* LEFT */],
-    [0, 1, 2 /* RIGHT */]
-  ];
-  var colors = ["rgb(255,100,255)", "rgb(255,150,150)", "rgb(0,0,255)", "rgb(255,0,0)", "rgb(0,255,0)", "rgb(255,255,0)", "rgb(0,255,255)", "rgb(255,0,255)", "rgb(128,128,128)", "rgb(128,0,0)", "rgb(128,128,0)", "rgb(0,128,0)", "rgb(0,0,128)", "rgb(128,0,128)", "rgb(0,128,128)", "rgb(128,128,128)"];
   function draw_circle(x, y, radious, ctx2, color, shadowBlur) {
     const prev_shadow = ctx2.shadowColor;
     const prev_glow = ctx2.shadowBlur;
@@ -74,6 +38,78 @@
     ctx2.lineWidth = prev_width;
   }
 
+  // src/typescript/src/const.ts
+  var [MAPS_WIDTH, MAPS_HEIGHT] = [22, 12];
+  var [MAX_WIDTH, MAX_HEIGHT] = [900, 900 / MAPS_WIDTH * MAPS_HEIGHT];
+  var AROUND = [
+    [1, 0, 3 /* UP */],
+    [-1, 0, 4 /* DOWN */],
+    [0, -1, 1 /* LEFT */],
+    [0, 1, 2 /* RIGHT */]
+  ];
+  var COLORS = ["rgb(255,100,255)", "rgb(255,150,150)", "rgb(0,0,255)", "rgb(255,0,0)", "rgb(0,255,0)", "rgb(255,255,0)", "rgb(0,255,255)", "rgb(255,0,255)", "rgb(128,128,128)", "rgb(128,0,0)", "rgb(128,128,0)", "rgb(0,128,0)", "rgb(0,0,128)", "rgb(128,0,128)", "rgb(0,128,128)", "rgb(128,128,128)"];
+
+  // src/typescript/src/text.ts
+  var TextInterface = class {
+    constructor(x, y, font_size, content, color, font_family = "Arial", canvas2) {
+      this.x = 0;
+      this.y = 0;
+      this.font_size = 0;
+      this.original_x = x;
+      this.original_y = y;
+      this.original_font_size = font_size;
+      this.resize(canvas2);
+      this.content = content;
+      this.color = color;
+    }
+    resize(canvas2) {
+      this.font_size = this.original_font_size / MAX_WIDTH * canvas2.width;
+      this.x = this.original_x / MAX_WIDTH * canvas2.width;
+      this.y = this.original_y / MAX_HEIGHT * canvas2.height;
+    }
+    update_text(content) {
+      this.content = content;
+    }
+    draw(ctx2) {
+      ctx2.fillStyle = this.color;
+      ctx2.font = `${this.font_size}px Arial`;
+      ctx2.textAlign = "center";
+      ctx2.fillText(this.content, this.x, this.y + this.font_size / 2);
+    }
+  };
+
+  // src/typescript/src/buttons.ts
+  var Button = class {
+    constructor(x, y, width, height, content, canvas2, font_size = 10, color = "white") {
+      this.width = 0;
+      this.height = 0;
+      this.x = 0;
+      this.y = 0;
+      this.original_x = x;
+      this.original_y = y;
+      this.original_width = width;
+      this.original_height = height;
+      this.text = new TextInterface(x + width / 2, y + height / 2, 20, content, "black", "Arial", canvas2);
+      this.resize(canvas2);
+      this.color = color;
+    }
+    resize(canvas2) {
+      this.x = this.original_x / MAX_WIDTH * canvas2.width;
+      this.y = this.original_y / MAX_HEIGHT * canvas2.height;
+      this.width = this.original_width / MAX_WIDTH * canvas2.width;
+      this.height = this.original_height / MAX_HEIGHT * canvas2.height;
+      this.text.resize(canvas2);
+    }
+    isPressed(x, y) {
+      return x >= this.x && x <= this.x + this.width && y >= this.y && y <= this.y + this.height;
+    }
+    draw(ctx2) {
+      ctx2.fillStyle = this.color;
+      ctx2.fillRect(this.x, this.y, this.width, this.height);
+      this.text.draw(ctx2);
+    }
+  };
+
   // src/typescript/src/maps.ts
   function string2Map(map) {
     return map.split("\n").map((line) => line.split("").map((char) => {
@@ -91,6 +127,20 @@
       }
     }));
   }
+  var cool_map_for_menu = string2Map([
+    "----------------------",
+    "-RRRRRR-RRRRRRRRRRRRS-",
+    "-R----R-R-------------",
+    "-RRRR-R-R-RRRRRR-RRR--",
+    "----R-R-R-R----R-R-R--",
+    "-RRRR-R-R-RRRR-R-R-R--",
+    "-R----R-R----R-R-R-R--",
+    "-RRRR-R-RRRRRR-R-R-R--",
+    "----R-R--------RRR-R--",
+    "-HRRR-RRRRRRRR-----R--",
+    "-------------RRRRRRR--",
+    "----------------------"
+  ].join("\n"));
   var first_map = string2Map([
     "----------------------",
     "---------H------------",
@@ -133,30 +183,33 @@
     "------HRRCRRRRCRRH----",
     "----------------------"
   ].join("\n").toUpperCase());
-  var [MAPS_WIDTH, MAPS_HEIGHT] = [22, 12];
 
   // src/typescript/src/selection_menu.ts
   var SelectionMenu = class {
-    constructor(height, width) {
+    constructor(canvas2) {
       this.buttons = [];
+      // the height and width of the canvas
       // the levels
       this.levels = [first_map, second_map, third_map];
       this.buttons_per_row = 4;
-      this.height = height;
-      this.width = width;
-      const button_width = this.width / this.buttons_per_row;
-      const button_height = this.height / this.buttons_per_row;
+      const button_width = MAX_WIDTH / this.buttons_per_row;
+      const button_height = MAX_HEIGHT / this.buttons_per_row;
       for (let i = 0; i < this.levels.length; i++) {
-        this.buttons.push(new Button(i * button_width, 0, button_width, button_height, `Level ${i + 1}`));
+        this.buttons.push(
+          new Button(
+            i * button_width,
+            Math.floor(i / this.buttons_per_row) * button_height,
+            button_width,
+            button_height,
+            `Level ${i + 1}`,
+            canvas2
+          )
+        );
       }
     }
     resize(canvas2) {
-      this.height = canvas2.height;
-      this.width = canvas2.width;
-      const button_width = this.width / this.buttons_per_row;
-      const button_height = this.height / this.buttons_per_row;
       for (let i = 0; i < this.levels.length; i++) {
-        this.buttons[i].update(i * button_width, Math.floor(i / 4) * button_height, button_width, button_height);
+        this.buttons[i].resize(canvas2);
       }
     }
     onClick(x, y) {
@@ -169,43 +222,9 @@
       return [];
     }
     draw(ctx2) {
-      console.log("drawing");
       for (let i = 0; i < this.buttons.length; i++) {
         this.buttons[i].draw(ctx2);
       }
-    }
-  };
-
-  // src/typescript/src/initial-menu.ts
-  var InitialMenu = class {
-    constructor(width, height) {
-      this.canvas_height_ratio = 8;
-      this.canvas_width_ratio = 8;
-      this.play_button = new Button(
-        width / 2,
-        height / 2,
-        width / this.canvas_width_ratio,
-        height / this.canvas_height_ratio,
-        "Play"
-      );
-    }
-    onClick(x, y) {
-      return this.play_button.isPressed(x, y);
-    }
-    draw(ctx2) {
-      this.play_button.draw(ctx2);
-    }
-    resize(canvas2) {
-      const width = canvas2.width;
-      const height = canvas2.height;
-      const play_button_width = width / this.canvas_width_ratio;
-      const play_button_height = height / this.canvas_height_ratio;
-      this.play_button.update(
-        width / 2 - play_button_width / 2,
-        height / 2 - play_button_height / 2,
-        play_button_width,
-        play_button_height
-      );
     }
   };
 
@@ -325,7 +344,7 @@
       this.renderOrb(this.x * map.length, this.y * map.length, this.length, this.length, ctx2);
     }
     renderOrb(x, y, width, height, ctx2) {
-      draw_circle(x, y, height / 2, ctx2, colors[this.house_id], 20);
+      draw_circle(x, y, height / 2, ctx2, COLORS[this.house_id], 20);
     }
     changeSpeed(time) {
       this.velocity = this.initialVelocity * (time / 1e3);
@@ -360,7 +379,7 @@
       this.height = level_design.length;
       this.SetupMap();
     }
-    async Draw(canvas2, ctx2) {
+    async Draw(ctx2) {
       const dx = this.length;
       const dy = this.length;
       const promises = [];
@@ -381,7 +400,7 @@
       switch (kind) {
         case 1 /* HOUSE */:
           draw_circle(x * dx + dx / 2, y * dy + dy / 2, this.length / 2, ctx2, "rgb(255,255,255)", 0);
-          draw_circle(x * dx + dx / 2, y * dy + dy / 2, this.length / 4, ctx2, colors[this.houses_id[y][x]], 10);
+          draw_circle(x * dx + dx / 2, y * dy + dy / 2, this.length / 4, ctx2, COLORS[this.houses_id[y][x]], 10);
           ctx2.fillStyle = "black";
           ctx2.textAlign = "center";
           ctx2.font = "10px Arial";
@@ -417,7 +436,7 @@
       this.UpdateChangingRails(level_x, level_y);
     }
     CheckDirections(x, y, before) {
-      const checkAround = around.filter(
+      const checkAround = AROUND.filter(
         (v) => !(before === 4 /* DOWN */ && v[2] === 3 /* UP */) && !(before === 3 /* UP */ && v[2] === 4 /* DOWN */) && !(before === 1 /* LEFT */ && v[2] === 2 /* RIGHT */) && !(before === 2 /* RIGHT */ && v[2] === 1 /* LEFT */)
       );
       const output = [];
@@ -479,17 +498,17 @@
       const [up_y, down_y, left_x, right_x] = [(y + 1) * dy, y * dy, x * dx, (x + 1) * dx];
       const before = this.level_before[y][x];
       const next = this.level_directions[y][x];
-      const around2 = [
+      const around = [
         { v: 3 /* UP */, x: center_x, y: down_y, x2: center_x, y2: up_y },
         { v: 4 /* DOWN */, x: center_x, y: up_y, x2: center_x, y2: down_y },
         { v: 1 /* LEFT */, x: right_x, y: center_y, x2: left_x, y2: center_y },
         { v: 2 /* RIGHT */, x: left_x, y: center_y, x2: right_x, y2: center_y }
       ];
-      const direction_before = around2.find((v) => v.v === before);
-      const direction_next = around2.find((v) => v.v === next);
+      const direction_before = around.find((v) => v.v === before);
+      const direction_next = around.find((v) => v.v === next);
       const changing_rails_positions = this.changing_rails_directions[y][x].filter((_, i) => i !== this.changing_rails_pos[y][x]);
       for (let c of changing_rails_positions) {
-        let direction_changing_rails = around2.find((v) => v.v === c);
+        let direction_changing_rails = around.find((v) => v.v === c);
         DrawLineColor(direction_before.x, direction_before.y, direction_changing_rails.x2, direction_changing_rails.y2, ctx2, "rgba(255, 255, 255, 0.23)", 15);
       }
       this.DrawLine(direction_before.x, direction_before.y, direction_next.x2, direction_next.y2, ctx2);
@@ -534,33 +553,39 @@
 
   // src/typescript/src/score-window.ts
   var scoreWindow = class {
-    constructor(x, y, width, height) {
-      this.x = x;
-      this.y = y;
-      this.width = width;
-      this.height = height;
+    constructor(canvas2) {
+      this.x = 0;
+      this.y = 0;
+      this.width = 0;
+      this.height = 0;
+      this.original_height = MAX_HEIGHT / 10;
+      this.original_width = MAX_WIDTH / 10;
+      this.original_x = MAX_WIDTH - this.original_width;
+      this.original_y = 0;
+      this.text = new TextInterface(this.original_x + this.original_width / 2, this.original_y + this.original_height / 2, 10, "", "black", "Arial", canvas2);
+      this.resize(canvas2);
     }
     resize(canvas2) {
-      this.width = canvas2.width / 10;
-      this.height = canvas2.height / 10;
-      this.x = canvas2.width - this.width;
+      this.x = this.original_x / MAX_WIDTH * canvas2.width;
+      this.y = this.original_y / MAX_HEIGHT * canvas2.height;
+      this.width = this.original_width / MAX_WIDTH * canvas2.width;
+      this.height = this.original_height / MAX_HEIGHT * canvas2.height;
     }
     draw(ctx2, current_time, correct_trains, total_trains) {
       ctx2.fillStyle = "red";
       ctx2.fillRect(this.x, this.y, this.width, this.height);
       ctx2.fillStyle = "rgb(179, 177, 177)";
       ctx2.fillRect(this.x, this.y, this.width, this.height);
-      ctx2.fillStyle = "rgb(0,0,0)";
-      ctx2.font = "10px Arial";
       const minutes = Math.floor(current_time / 1e3 / 60);
       const seconds = Math.floor(current_time / 1e3 % 60);
-      ctx2.fillText(`${minutes}:${seconds}| ${correct_trains} of ${total_trains}`, this.x + this.width / 2, this.y + this.height / 2);
+      this.text.update_text(`${minutes}:${seconds}| ${correct_trains} of ${total_trains}`);
+      this.text.draw(ctx2);
     }
   };
 
   // src/typescript/src/game-state.ts
   var GameState = class {
-    constructor(level) {
+    constructor(level, canvas2, score_window_yes = true) {
       this.trains = [];
       this.spawnTrainTime = 3500;
       this.spawnTrainTimelapse = this.spawnTrainTime;
@@ -571,7 +596,8 @@
       this.current_time = this.initial_time;
       this.score = 0;
       this.gameMap = new GameMap(level);
-      this.score_window = new scoreWindow(0, 0, 0, 0);
+      this.score_window_yes = score_window_yes;
+      this.score_window = new scoreWindow(canvas2);
     }
     resize(canvas2, dx) {
       this.score_window.resize(canvas2);
@@ -603,12 +629,12 @@
         train.changeSpeed(deltaTime);
       });
     }
-    async draw(canvas2, ctx2) {
+    async draw(ctx2) {
       if (this.spawnTrainTimelapse <= 0) {
         this.spawnTrain();
         this.spawnTrainTimelapse = this.spawnTrainTime;
       }
-      this.gameMap.Draw(canvas2, ctx2);
+      this.gameMap.Draw(ctx2);
       this.trains = this.trains.filter((train) => {
         if (train.ready) {
           this.total_trains++;
@@ -621,21 +647,65 @@
       await Promise.all(this.trains.map(async (train) => {
         await train.Draw(this.gameMap, ctx2);
       }));
-      this.score_window.draw(ctx2, this.current_time, this.correct_trains, this.total_trains);
+      if (this.score_window_yes) {
+        this.score_window.draw(ctx2, this.current_time, this.correct_trains, this.total_trains);
+      }
+    }
+  };
+
+  // src/typescript/src/initial-menu.ts
+  var InitialMenu = class {
+    constructor(canvas2) {
+      this.canvas_height_ratio = 8;
+      this.canvas_width_ratio = 8;
+      this.game_state = new GameState(cool_map_for_menu, canvas2, false);
+      this.play_button = new Button(
+        MAX_WIDTH / 2 - 112 / 2,
+        MAX_HEIGHT / 2,
+        112,
+        61,
+        "Play",
+        canvas2
+      );
+    }
+    onClick(x, y) {
+      return this.play_button.isPressed(x, y);
+    }
+    draw(ctx2) {
+      this.game_state.draw(ctx2);
+      this.play_button.draw(ctx2);
+    }
+    async updateSpeed(deltaTime) {
+      this.game_state.updateSpeed(deltaTime);
+    }
+    resize(canvas2) {
+      const width = Math.min(MAX_WIDTH, window.innerWidth);
+      const dx = width / MAPS_WIDTH;
+      this.game_state.resize(canvas2, dx);
+      this.play_button.resize(canvas2);
     }
   };
 
   // src/typescript/src/game-over.ts
   var GameOver = class {
-    constructor() {
-      this.ratio_height = 2;
-      //i want this shit to be centered
-      this.ratio_width = 2;
+    constructor(canvas2) {
       this.x = 0;
       this.y = 0;
       this.width = 0;
       this.height = 0;
-      this.gameOverButton = new Button(this.x, this.y, this.width, this.height, "replay", "white");
+      this.original_height = MAX_HEIGHT / 2;
+      this.original_width = MAX_WIDTH / 2;
+      this.original_x = (MAX_WIDTH - this.original_width) / 2;
+      this.original_y = (MAX_HEIGHT - this.original_height) / 2;
+      this.gameOverButton = new Button(
+        this.original_x + this.original_width / 2 - this.original_width / 4,
+        this.original_y + this.original_height - 95,
+        this.original_width / 2,
+        90,
+        "replay",
+        canvas2
+      );
+      this.resize(canvas2);
     }
     onClick(x, y) {
       return this.gameOverButton.isPressed(x, y);
@@ -648,21 +718,20 @@
       ctx2.fillText(`Game Over`, this.x + this.width / 2, this.y);
       ctx2.font = "10px Arial";
       ctx2.fillText(`${correct_trains} of ${total_trains}`, this.x + this.width / 2, this.y + this.height / 8 + 40);
-      console.log("TODO add game over class");
       this.gameOverButton.draw(ctx2);
     }
     resize(canvas2) {
-      this.width = canvas2.width / this.ratio_width;
-      this.height = canvas2.height / this.ratio_height;
-      this.x = canvas2.width / 2 - this.width / 2;
-      this.y = canvas2.height / 2 - this.height / 2;
-      this.gameOverButton.update(this.x + this.height / 2, this.y + this.height / 2, this.width / 2, this.height / 2.2);
+      this.x = this.original_x / MAX_WIDTH * canvas2.width;
+      this.y = this.original_y / MAX_HEIGHT * canvas2.height;
+      this.width = this.original_width / MAX_WIDTH * canvas2.width;
+      this.height = this.original_height / MAX_HEIGHT * canvas2.height;
+      this.gameOverButton.resize(canvas2);
     }
   };
 
   // src/typescript/src/game.ts
   var Game = class {
-    constructor() {
+    constructor(canvas2) {
       this.state = 0;
       this.lastFrameTime = 0;
       this.FPS = 60;
@@ -670,12 +739,10 @@
       this.game_state = null;
       this.correct_trains = 0;
       this.total_trains = 0;
-      this.base_width = 900;
-      this.base_height = 900 / MAPS_WIDTH * MAPS_HEIGHT;
-      this.selection_menu = new SelectionMenu(100, 50);
-      this.menu = new InitialMenu(this.base_width, this.base_height);
-      this.selection_menu = new SelectionMenu(this.base_width, this.base_height);
-      this.game_over = new GameOver();
+      this.selection_menu = new SelectionMenu(canvas2);
+      this.menu = new InitialMenu(canvas2);
+      this.selection_menu = new SelectionMenu(canvas2);
+      this.game_over = new GameOver(canvas2);
     }
     onKeyPress(e, canvas2) {
       const key = e.key.toLowerCase();
@@ -691,7 +758,6 @@
       if (["q", "n"].includes(key)) {
         this.state = 3;
         this.game_state = null;
-        this.game_state = new GameState(this.selection_menu.levels[0]);
       }
     }
     async draw(canvas2, ctx2) {
@@ -703,6 +769,7 @@
       if (deltaTime >= this.frameDelay) {
         switch (this.state) {
           case 0:
+            ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
             this.menu.resize(canvas2);
             this.menu.draw(ctx2);
             break;
@@ -718,7 +785,7 @@
             const dx = canvas2.width / MAPS_WIDTH;
             this.game_state.resize(canvas2, dx);
             this.game_state.updateSpeed(deltaTime);
-            this.game_state.draw(canvas2, ctx2);
+            this.game_state.draw(ctx2);
             if (this.game_state.checkTime()) {
               this.state = 3;
             }
@@ -739,7 +806,7 @@
       requestAnimationFrame(() => this.draw(canvas2, ctx2));
     }
     windowResize(canvas2) {
-      const width = Math.min(this.base_width, window.innerWidth);
+      const width = Math.min(MAX_WIDTH, window.innerWidth);
       const dx = width / MAPS_WIDTH;
       canvas2.width = width;
       canvas2.height = dx * MAPS_HEIGHT;
@@ -764,7 +831,7 @@
         case 1:
           const level = this.selection_menu.onClick(x, y);
           if (level) {
-            this.game_state = new GameState(level);
+            this.game_state = new GameState(level, canvas2);
             this.windowResize(canvas2);
             this.state = 2;
             ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
@@ -791,7 +858,7 @@
   canvas.width = Math.min(window.innerWidth, 600);
   canvas.height = Math.min(window.innerWidth / 1.2, 600 / 1.2);
   var ctx = canvas.getContext("2d");
-  var game = new Game();
+  var game = new Game(canvas);
   game.windowResize(canvas);
   window.addEventListener("resize", () => {
     game.windowResize(canvas);
@@ -804,4 +871,3 @@
   });
   game.draw(canvas, ctx);
 })();
-
