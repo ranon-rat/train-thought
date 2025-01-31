@@ -18,12 +18,13 @@ export class GameOver {
 
         this.original_height = MAX_HEIGHT / 2
         this.original_width = MAX_WIDTH / 2
-        this.original_x = MAX_WIDTH / 2 - this.original_width
-        this.original_y = MAX_HEIGHT / 2 - this.original_height
+        this.original_x = (MAX_WIDTH - this.original_width) / 2
+        this.original_y = (MAX_HEIGHT - this.original_height) / 2
+
         this.gameOverButton = new Button(
-            this.original_x + this.original_width / 2,
-            this.original_y + this.original_height / 2,
-            this.original_width / 2, this.original_height / 2.2,
+            (this.original_x + this.original_width / 2) - this.original_width / 4,
+            (this.original_y + this.original_height) - 95,
+            this.original_width / 2, 90,
             "replay", canvas)
         this.resize(canvas)
     }
