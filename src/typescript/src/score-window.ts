@@ -10,13 +10,14 @@ export class scoreWindow {
     width: number = 0
     height: number = 0
     text: TextInterface
-    constructor(x: number, y: number, width: number, height: number, canvas: HTMLCanvasElement) {
+    constructor(canvas: HTMLCanvasElement) {
 
-        this.original_x = x
-        this.original_y = y
-        this.original_height = height
-        this.original_width = width
-        this.text = new TextInterface(x + width / 2, y + height / 2, 10, "", "black", "Arial", canvas)
+
+        this.original_height = MAX_HEIGHT / 10
+        this.original_width = MAX_WIDTH / 10
+        this.original_x = MAX_WIDTH - this.original_width
+        this.original_y = 0
+        this.text = new TextInterface(this.original_x + this.original_width / 2, this.original_y + this.original_height / 2, 10, "", "black", "Arial", canvas)
         this.resize(canvas)
     }
     resize(canvas: HTMLCanvasElement) {

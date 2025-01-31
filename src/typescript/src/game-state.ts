@@ -20,7 +20,7 @@ export class GameState {
     constructor(level: Kind[][], canvas: HTMLCanvasElement) {
         this.score = 0;
         this.gameMap = new GameMap(level)
-        this.score_window = new scoreWindow(0, 0, 0, 0, canvas)
+        this.score_window = new scoreWindow(canvas)
     }
     resize(canvas: HTMLCanvasElement, dx: number) {
         this.score_window.resize(canvas)

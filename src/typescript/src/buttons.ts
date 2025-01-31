@@ -29,7 +29,6 @@ export class Button {
     resize(canvas: HTMLCanvasElement) {
         this.x = (this.original_x / MAX_WIDTH) * canvas.width
         this.y = (this.original_y / MAX_HEIGHT) * canvas.height
-
         this.width = (this.original_width / MAX_WIDTH) * canvas.width
         this.height = (this.original_height / MAX_HEIGHT) * canvas.height
         this.text.resize(canvas)

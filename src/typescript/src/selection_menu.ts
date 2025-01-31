@@ -9,17 +9,12 @@ import { MAX_WIDTH, MAX_HEIGHT } from "./const";
 export class SelectionMenu {
     buttons: Button[] = []
     // the height and width of the canvas
-
     // the levels
     levels: Kind[][][] = [first_map, second_map, third_map]
     buttons_per_row: number = 4
-
     constructor(canvas: HTMLCanvasElement) {
-
         const button_width = MAX_WIDTH / this.buttons_per_row
         const button_height = MAX_HEIGHT / this.buttons_per_row
-
-
         for (let i = 0; i < this.levels.length; i++) {
             this.buttons.push(
                 new Button(i * button_width,
@@ -46,7 +41,6 @@ export class SelectionMenu {
     }
     draw(ctx: CanvasRenderingContext2D) {
         // como maximo quisiera 4 botones por fila
-        console.log("drawing")
         for (let i = 0; i < this.buttons.length; i++) {
             this.buttons[i].draw(ctx)
         }

@@ -7,7 +7,6 @@ export class InitialMenu {
     canvas_width_ratio: number = 8;
 
     constructor(canvas: HTMLCanvasElement) {
-
         this.play_button = new Button(
             MAX_WIDTH / 2,
             MAX_HEIGHT / 2,

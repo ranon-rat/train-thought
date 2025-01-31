@@ -25,6 +25,7 @@ export class GameOver {
             this.original_y + this.original_height / 2,
             this.original_width / 2, this.original_height / 2.2,
             "replay", canvas)
+        this.resize(canvas)
     }
     onClick(x: number, y: number) {
         return this.gameOverButton.isPressed(x, y)
@@ -37,7 +38,6 @@ export class GameOver {
         ctx.fillText(`Game Over`, this.x + this.width / 2, this.y)
         ctx.font = "10px Arial"
         ctx.fillText(`${correct_trains} of ${total_trains}`, this.x + this.width / 2, this.y + this.height / 8 + 40)
-        console.log("TODO add game over class")
         this.gameOverButton.draw(ctx)
     }
     resize(canvas: HTMLCanvasElement) {
