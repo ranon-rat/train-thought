@@ -12,7 +12,7 @@ export class InitialMenu {
     constructor(canvas: HTMLCanvasElement) {
         this.game_state = new GameState(cool_map_for_menu, canvas, false)
         this.play_button = new Button(
-            MAX_WIDTH / 2,
+            MAX_WIDTH / 2 - 112 / 2,
             MAX_HEIGHT / 2,
             112,
             61,
