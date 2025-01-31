@@ -26,6 +26,7 @@ export class scoreWindow {
 
         this.width = (this.original_width / MAX_WIDTH) * canvas.width
         this.height = (this.original_height / MAX_HEIGHT) * canvas.height
+        this.text.resize(canvas)
     }
 
     draw(ctx: CanvasRenderingContext2D, current_time: number, correct_trains: number, total_trains: number) {
