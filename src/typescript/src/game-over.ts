@@ -1,39 +1,51 @@
 import { Button } from "./buttons";
+import { MAX_HEIGHT, MAX_WIDTH } from "./const";
+
 
 export class GameOver {
-    x:number
-    y:number
-    width:number
-    height:number
-    ratio_height:number=2//i want this shit to be centered
-    ratio_width:number=2//i want this shit to be centered
-    gameOverButton:Button
-    constructor() {
-        this.x=0
-        this.y=0
-        this.width=0
-        this.height=0
-        this.gameOverButton=new Button(this.x,this.y,this.width,this.height,"replay","white")
+    original_x: number
+    original_y: number
+    original_width: number
+    original_height: number
+    x: number = 0
+    y: number = 0
+    width: number = 0
+    height: number = 0
+
+    gameOverButton: Button
+    constructor(canvas: HTMLCanvasElement) {
+
+
+        this.original_height = MAX_HEIGHT / 2
+        this.original_width = MAX_WIDTH / 2
+        this.original_x = MAX_WIDTH / 2 - this.original_width
+        this.original_y = MAX_HEIGHT / 2 - this.original_height
+        this.gameOverButton = new Button(
+            this.original_x + this.original_width / 2,
+            this.original_y + this.original_height / 2,
+            this.original_width / 2, this.original_height / 2.2,
+            "replay", canvas)
     }
-    onClick(x:number,y:number){
-        return this.gameOverButton.isPressed(x,y)
+    onClick(x: number, y: number) {
+        return this.gameOverButton.isPressed(x, y)
     }
-    draw( ctx: CanvasRenderingContext2D,correct_trains:number,total_trains:number) {
+    draw(ctx: CanvasRenderingContext2D, correct_trains: number, total_trains: number) {
         ctx.fillStyle = "rgb(0,0,0)"
         ctx.fillRect(this.x, this.y, this.width, this.height)
         ctx.fillStyle = "rgb(255,255,255)"
         ctx.font = "80px Arial"
-        ctx.fillText(`Game Over`,this.x+this.width/2,this.y )
+        ctx.fillText(`Game Over`, this.x + this.width / 2, this.y)
         ctx.font = "10px Arial"
-        ctx.fillText(`${correct_trains} of ${total_trains}`, this.x + this.width/2, this.y + this.height/8 + 40)
+        ctx.fillText(`${correct_trains} of ${total_trains}`, this.x + this.width / 2, this.y + this.height / 8 + 40)
         console.log("TODO add game over class")
         this.gameOverButton.draw(ctx)
     }
-    resize(canvas:HTMLCanvasElement){
-        this.width = canvas.width / this.ratio_width
-        this.height = canvas.height / this.ratio_height
-        this.x = canvas.width/2 - this.width/2
-        this.y = canvas.height/2 - this.height/2
-        this.gameOverButton.update(this.x+this.height/2,this.y+this.height/2,this.width/2,this.height/2.2)
+    resize(canvas: HTMLCanvasElement) {
+        this.x = (this.original_x / MAX_WIDTH) * canvas.width
+        this.y = (this.original_y / MAX_HEIGHT) * canvas.height
+        this.width = (this.original_width / MAX_WIDTH) * canvas.width
+        this.height = (this.original_height / MAX_HEIGHT) * canvas.height
+
+        this.gameOverButton.resize(canvas)
     }
 }

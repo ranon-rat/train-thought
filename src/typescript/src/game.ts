@@ -3,7 +3,7 @@ import { SelectionMenu } from "./selection_menu"
 import { InitialMenu } from "./initial-menu"
 import { GameState } from "./game-state"
 import { GameOver } from "./game-over"
-import { MAPS_WIDTH, MAPS_HEIGHT } from "./maps"
+import { MAPS_WIDTH, MAPS_HEIGHT, MAX_WIDTH } from "./const"
 
 // i should add something for the game over
 export class Game {
@@ -19,13 +19,12 @@ export class Game {
 
     correct_trains: number = 0
     total_trains: number = 0
-    base_width: number = 900
-    base_height: number = (900 / MAPS_WIDTH) * MAPS_HEIGHT
-    constructor() {
-        this.selection_menu = new SelectionMenu(100, 50)
-        this.menu = new InitialMenu(this.base_width, this.base_height)
-        this.selection_menu = new SelectionMenu(this.base_width, this.base_height)
-        this.game_over = new GameOver()
+
+    constructor(canvas: HTMLCanvasElement) {
+        this.selection_menu = new SelectionMenu(canvas)
+        this.menu = new InitialMenu(canvas)
+        this.selection_menu = new SelectionMenu(canvas)
+        this.game_over = new GameOver(canvas)
     }
 
     onKeyPress(e: KeyboardEvent, canvas: HTMLCanvasElement) {
@@ -43,7 +42,6 @@ export class Game {
             this.state = 3
 
             this.game_state = null
-            this.game_state = new GameState(this.selection_menu.levels[0])
         }
     }
 
@@ -101,7 +99,7 @@ export class Game {
 
     }
     windowResize(canvas: HTMLCanvasElement) {
-        const width = Math.min(this.base_width, window.innerWidth)
+        const width = Math.min(MAX_WIDTH, window.innerWidth)
         const dx = width / MAPS_WIDTH
         canvas.width = width
         canvas.height = dx * MAPS_HEIGHT
@@ -133,7 +131,7 @@ export class Game {
                 const level = this.selection_menu.onClick(x, y)
                 if (level) {
 
-                    this.game_state = new GameState(level)
+                    this.game_state = new GameState(level, canvas)
                     this.windowResize(canvas)
                     this.state = 2
                     ctx.clearRect(0, 0, canvas.width, canvas.height)

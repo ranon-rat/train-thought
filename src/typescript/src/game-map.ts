@@ -1,5 +1,5 @@
-import { Kind, Direction, around, colors, draw_circle, its_out_of_bounds, DrawLineColor } from "./types-enum-constants"
-
+import { Kind, Direction, draw_circle, its_out_of_bounds, DrawLineColor } from "./types-enum-constants"
+import { AROUND, COLORS } from "./const";
 
 export class GameMap {
     level_design: Kind[][] = [
@@ -61,9 +61,9 @@ export class GameMap {
     DrawPart(x: number, y: number, dx: number, dy: number, kind: Kind, ctx: CanvasRenderingContext2D) {
         switch (kind) {
             case Kind.HOUSE:
-                draw_circle(x*dx+dx/2, y*dy+dy/2, this.length / 2, ctx, "rgb(255,255,255)", 0)
+                draw_circle(x * dx + dx / 2, y * dy + dy / 2, this.length / 2, ctx, "rgb(255,255,255)", 0)
 
-                draw_circle(x*dx+dx/2, y*dy+dy/2, this.length / 4, ctx, colors[this.houses_id[y][x]], 10)
+                draw_circle(x * dx + dx / 2, y * dy + dy / 2, this.length / 4, ctx, COLORS[this.houses_id[y][x]], 10)
                 ctx.fillStyle = "black"
                 ctx.textAlign = "center"
                 ctx.font = "10px Arial"
@@ -71,8 +71,8 @@ export class GameMap {
                 //  ctx.fillText(`${this.houses_id[y][x]}`,x * dx + dx / 2, y * dy + dy / 2);
                 break
             case Kind.CHANGING_RAIL:
-                draw_circle(x*dx+dx/2, y*dy+dy/2, this.length / 2, ctx, "rgb(171, 255, 241,0.5)", 0)
-                draw_circle(x*dx+dx/2, y*dy+dy/2, this.length / 4, ctx, "rgb(0,0,0,0.5)", 10)
+                draw_circle(x * dx + dx / 2, y * dy + dy / 2, this.length / 2, ctx, "rgb(171, 255, 241,0.5)", 0)
+                draw_circle(x * dx + dx / 2, y * dy + dy / 2, this.length / 4, ctx, "rgb(0,0,0,0.5)", 10)
                 break
             case Kind.SPAWNER:
                 ctx.fillStyle = "rgb(0,0,255)"
@@ -103,7 +103,7 @@ export class GameMap {
     public CheckDirections(x: number, y: number, before: Direction): [number, number, Direction][] {
         // y x v
         // with this i delete the things that will make me go backwards
-        const checkAround: [number, number, Direction][] = around.filter(v =>
+        const checkAround: [number, number, Direction][] = AROUND.filter(v =>
             !(before === Direction.DOWN && v[2] === Direction.UP) &&
             !(before === Direction.UP && v[2] === Direction.DOWN) &&
             !(before === Direction.LEFT && v[2] === Direction.RIGHT) &&
@@ -195,9 +195,9 @@ export class GameMap {
 
         const direction_before = around.find(v => v.v === before)!
         const direction_next = around.find(v => v.v === next)!
-        const changing_rails_positions= this.changing_rails_directions[y][x].filter((_,i)=>i!==this.changing_rails_pos[y][x])
-        for(let c of changing_rails_positions){
-            let direction_changing_rails=around.find(v=>v.v===c)!
+        const changing_rails_positions = this.changing_rails_directions[y][x].filter((_, i) => i !== this.changing_rails_pos[y][x])
+        for (let c of changing_rails_positions) {
+            let direction_changing_rails = around.find(v => v.v === c)!
 
             DrawLineColor(direction_before.x, direction_before.y, direction_changing_rails.x2, direction_changing_rails.y2, ctx, "rgba(255, 255, 255, 0.23)", 15)
 

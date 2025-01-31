@@ -17,16 +17,16 @@ export class GameState {
     current_time: number = this.initial_time
 
 
-    constructor(level: Kind[][]) {
+    constructor(level: Kind[][], canvas: HTMLCanvasElement) {
         this.score = 0;
         this.gameMap = new GameMap(level)
-        this.score_window = new scoreWindow(0, 0, 0, 0)
+        this.score_window = new scoreWindow(0, 0, 0, 0, canvas)
     }
-    resize(canvas: HTMLCanvasElement,dx:number) {
+    resize(canvas: HTMLCanvasElement, dx: number) {
         this.score_window.resize(canvas)
-    
+
         this.gameMap.UpdateLength(dx)
-     
+
         this.trains.forEach(train => {
             train.resize(dx)
         })
@@ -47,7 +47,7 @@ export class GameState {
     checkTime() {
         return this.current_time <= 0
     }
-    onClick(x: number, y: number,width:number,height:number) {
+    onClick(x: number, y: number, width: number, height: number) {
         this.gameMap.Click(x, y, width, height)
     }
     async updateSpeed(deltaTime: number) {
@@ -57,8 +57,8 @@ export class GameState {
     }
     async draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D,) {
         if (this.spawnTrainTimelapse <= 0) {
-                this.spawnTrain()
-            
+            this.spawnTrain()
+
             this.spawnTrainTimelapse = this.spawnTrainTime
         }
         this.gameMap.Draw(canvas, ctx)

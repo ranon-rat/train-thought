@@ -1,5 +1,6 @@
 import { GameMap } from "./game-map"
-import { colors, Direction, draw_circle, Kind } from "./types-enum-constants"
+import { Direction, draw_circle, Kind } from "./types-enum-constants"
+import { COLORS } from "./const"
 export class Train {
     x: number = 0
     y: number = 0
@@ -20,7 +21,7 @@ export class Train {
     // improving animations and events
     dX: number = 0
     dY: number = 0
-    length_ratio:number=2.1
+    length_ratio: number = 2.1
     constructor(x: number, y: number, map: GameMap, house_id: number) {
         this.length = map.GetLength() / this.length_ratio
         this.y = (y + 0.5)
@@ -61,7 +62,7 @@ export class Train {
         if (point === Kind.HOUSE) {
             [dx, dy] = this.getDirectionVector(next);
         }
-        
+
         this.dX = dx
         this.dY = dy
         return [dx, dy]
@@ -121,15 +122,15 @@ export class Train {
         // moving in an array(well kinda) but its not fixed and its constantly moving and so
         // its important we correct the path
         if (dx !== 0 || dy !== 0) {
-            this.x=dx===0?Math.floor(this.x)+0.5:this.x
-            this.y=dy===0?Math.floor(this.y)+0.5:this.y
+            this.x = dx === 0 ? Math.floor(this.x) + 0.5 : this.x
+            this.y = dy === 0 ? Math.floor(this.y) + 0.5 : this.y
         }
         this.x += dx * this.velocity
         this.y += dy * this.velocity
         this.renderOrb(this.x * map.length, this.y * map.length, this.length, this.length, ctx)
     }
     renderOrb(x: number, y: number, width: number, height: number, ctx: CanvasRenderingContext2D) {
-        draw_circle(x, y, height / 2, ctx, colors[this.house_id], 20)
+        draw_circle(x, y, height / 2, ctx, COLORS[this.house_id], 20)
     }
 
 

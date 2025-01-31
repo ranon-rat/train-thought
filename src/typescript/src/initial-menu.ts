@@ -1,17 +1,19 @@
 import { Button } from "./buttons";
+import { MAX_WIDTH, MAX_HEIGHT } from "./const";
 
 export class InitialMenu {
     play_button: Button
     canvas_height_ratio: number = 8;
     canvas_width_ratio: number = 8;
 
-    constructor( width: number,height: number) {
+    constructor(canvas: HTMLCanvasElement) {
+
         this.play_button = new Button(
-            width / 2,
-            height / 2,
-            width / this.canvas_width_ratio,
-            height / this.canvas_height_ratio,
-            "Play");
+            MAX_WIDTH / 2,
+            MAX_HEIGHT / 2,
+            112,
+            61,
+            "Play", canvas);
     }
     onClick(x: number, y: number) {
         return this.play_button.isPressed(x, y);
@@ -21,16 +23,6 @@ export class InitialMenu {
 
     }
     resize(canvas: HTMLCanvasElement) {
-        const width = canvas.width;
-        const height = canvas.height;
-        const play_button_width = width / this.canvas_width_ratio;
-        const play_button_height = height / this.canvas_height_ratio; 
-        this.play_button.update(
-            width / 2 - play_button_width / 2,
-            height / 2 - play_button_height / 2,
-            play_button_width,
-            play_button_height
-        );
-
+        this.play_button.resize(canvas)
     }
 }

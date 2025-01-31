@@ -1,31 +1,42 @@
-export class scoreWindow{
-    x:number
-    y:number
-    width:number
-    height:number
-    constructor(x:number,y:number,width:number,height:number){
-        this.x=x
-        this.y=y
-        this.width=width
-        this.height=height
+import { MAX_HEIGHT, MAX_WIDTH } from "./const"
+import { TextInterface } from "./text"
+export class scoreWindow {
+    original_x: number
+    original_y: number
+    original_width: number
+    original_height: number
+    x: number = 0
+    y: number = 0
+    width: number = 0
+    height: number = 0
+    text: TextInterface
+    constructor(x: number, y: number, width: number, height: number, canvas: HTMLCanvasElement) {
+
+        this.original_x = x
+        this.original_y = y
+        this.original_height = height
+        this.original_width = width
+        this.text = new TextInterface(x + width / 2, y + height / 2, 10, "", "black", "Arial", canvas)
+        this.resize(canvas)
     }
-    resize(canvas:HTMLCanvasElement){
-        this.width = canvas.width / 10
-        this.height = canvas.height / 10
-        this.x = canvas.width - this.width
+    resize(canvas: HTMLCanvasElement) {
+        this.x = (this.original_x / MAX_WIDTH) * canvas.width
+        this.y = (this.original_y / MAX_HEIGHT) * canvas.height
+
+        this.width = (this.original_width / MAX_WIDTH) * canvas.width
+        this.height = (this.original_height / MAX_HEIGHT) * canvas.height
     }
-    
-    draw(ctx:CanvasRenderingContext2D,current_time:number,correct_trains:number,total_trains:number){
-        ctx.fillStyle="red"
-        ctx.fillRect(this.x,this.y,this.width,this.height)
+
+    draw(ctx: CanvasRenderingContext2D, current_time: number, correct_trains: number, total_trains: number) {
+        ctx.fillStyle = "red"
+        ctx.fillRect(this.x, this.y, this.width, this.height)
         ctx.fillStyle = "rgb(179, 177, 177)"
         ctx.fillRect(this.x, this.y, this.width, this.height)
-        ctx.fillStyle = "rgb(0,0,0)"
-        ctx.font = "10px Arial"
+
         // it has to show the m:ss
         const minutes = Math.floor(current_time / 1000 / 60)
         const seconds = Math.floor((current_time / 1000) % 60)
-        ctx.fillText(`${minutes}:${seconds}| ${correct_trains} of ${total_trains}`, this.x + this.width / 2, this.y + this.height / 2)
-           
+        this.text.update_text(`${minutes}:${seconds}| ${correct_trains} of ${total_trains}`)
+        this.text.draw(ctx)
     }
 }

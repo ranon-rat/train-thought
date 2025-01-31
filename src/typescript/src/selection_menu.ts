@@ -1,6 +1,7 @@
 import { Button } from "./buttons";
 import { first_map, second_map, third_map } from "./maps";
 import { Kind } from "./types-enum-constants";
+import { MAX_WIDTH, MAX_HEIGHT } from "./const";
 
 // here we will have the selection menu
 
@@ -8,28 +9,30 @@ import { Kind } from "./types-enum-constants";
 export class SelectionMenu {
     buttons: Button[] = []
     // the height and width of the canvas
-    height: number
-    width: number
+
     // the levels
     levels: Kind[][][] = [first_map, second_map, third_map]
     buttons_per_row: number = 4
 
-    constructor(height: number, width: number) {
-        this.height = height
-        this.width = width
-        const button_width = this.width / this.buttons_per_row
-        const button_height = this.height / this.buttons_per_row
+    constructor(canvas: HTMLCanvasElement) {
+
+        const button_width = MAX_WIDTH / this.buttons_per_row
+        const button_height = MAX_HEIGHT / this.buttons_per_row
+
+
         for (let i = 0; i < this.levels.length; i++) {
-            this.buttons.push(new Button(i * button_width, 0, button_width, button_height, `Level ${i + 1}`))
+            this.buttons.push(
+                new Button(i * button_width,
+                    Math.floor(i / this.buttons_per_row) * button_height,
+                    button_width,
+                    button_height, `Level ${i + 1}`, canvas)
+
+            )
         }
     }
     resize(canvas: HTMLCanvasElement) {
-        this.height = canvas.height
-        this.width = canvas.width
-        const button_width = this.width / this.buttons_per_row
-        const button_height = this.height / this.buttons_per_row
         for (let i = 0; i < this.levels.length; i++) {
-            this.buttons[i].update(i * button_width,Math.floor(i/4) *button_height, button_width, button_height)
+            this.buttons[i].resize(canvas)
         }
     }
     onClick(x: number, y: number): Kind[][] {
