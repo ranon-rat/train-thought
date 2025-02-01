@@ -1,6 +1,6 @@
 import { GameMap } from "./game-map"
 import { Direction, draw_circle, Kind } from "./types-enum-constants"
-import { COLORS } from "./const"
+import { COLORS, MAPS_WIDTH } from "./const"
 export class Train {
     x: number = 0
     y: number = 0
@@ -28,8 +28,8 @@ export class Train {
         this.x = (x + 0.5)
         this.house_id = house_id
     }
-    resize(length: number) {
-        this.length = length / this.length_ratio
+    resize(canvas: HTMLCanvasElement) {
+        this.length = canvas.height / (MAPS_WIDTH * this.length_ratio)
     }
     Move(map: GameMap, x: number, y: number): [number, number] {
         let [x_l, y_l] = [x, y]
@@ -45,7 +45,8 @@ export class Train {
             return [dx, dy]
         }
         if (this.rotatingDirection === Direction.NEUTRAL || point !== Kind.CHANGING_RAIL) {
-            console.log(this.printDirection(before), this.printDirection(next));
+
+            // this is only for debugging, for now its better to avoid using it : )  console.log(this.printDirection(before), this.printDirection(next));
             this.rotatingDirection = next
         }
         next = this.rotatingDirection

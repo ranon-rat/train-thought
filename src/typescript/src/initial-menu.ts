@@ -31,9 +31,8 @@ export class InitialMenu {
     }
 
     resize(canvas: HTMLCanvasElement) {
-        const width = Math.min(MAX_WIDTH, window.innerWidth)
-        const dx = width / MAPS_WIDTH
-        this.game_state.resize(canvas, dx)
+
+        this.game_state.resize(canvas)
         this.play_button.resize(canvas)
     }
 }

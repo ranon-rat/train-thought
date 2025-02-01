@@ -24,13 +24,11 @@ export class GameState {
         this.score_window_yes = score_window_yes
         this.score_window = new scoreWindow(canvas)
     }
-    resize(canvas: HTMLCanvasElement, dx: number) {
+    resize(canvas: HTMLCanvasElement) {
         this.score_window.resize(canvas)
-
-        this.gameMap.UpdateLength(dx)
-
+        this.gameMap.resize(canvas)
         this.trains.forEach(train => {
-            train.resize(dx)
+            train.resize(canvas)
         })
     }
     spawnTrain() {

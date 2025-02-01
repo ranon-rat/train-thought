@@ -1,5 +1,5 @@
 import { Kind, Direction, draw_circle, its_out_of_bounds, DrawLineColor } from "./types-enum-constants"
-import { AROUND, COLORS } from "./const";
+import { AROUND, COLORS, MAPS_WIDTH } from "./const";
 
 export class GameMap {
     level_design: Kind[][] = [
@@ -209,8 +209,8 @@ export class GameMap {
     DrawLine(x1: number, y1: number, x2: number, y2: number, ctx: CanvasRenderingContext2D) {
         DrawLineColor(x1, y1, x2, y2, ctx, "rgb(255,255,255)", 15)
     }
-    UpdateLength(length: number) {
-        this.length = length
+    resize(canvas: HTMLCanvasElement) {
+        this.length = canvas.width / MAPS_WIDTH
     }
     GetLength() {
         return this.length

@@ -106,7 +106,7 @@ export class Game {
         this.selection_menu.resize(canvas)
         this.game_over.resize(canvas)
         if (this.game_state) {
-            this.game_state.resize(canvas, dx)
+            this.game_state.resize(canvas)
         }
     }
     click(e: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
@@ -126,16 +126,13 @@ export class Game {
 
                 break
             case 1:
-                // add level selection
 
                 const level = this.selection_menu.onClick(x, y)
                 if (level) {
-
                     this.game_state = new GameState(level, canvas)
                     this.windowResize(canvas)
                     this.state = 2
                     ctx.clearRect(0, 0, canvas.width, canvas.height)
-
                 }
                 break
             case 2:// game
