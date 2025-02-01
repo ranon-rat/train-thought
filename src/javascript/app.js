@@ -585,7 +585,7 @@
   var GameState = class {
     constructor(level, canvas2, score_window_yes = true) {
       this.trains = [];
-      this.spawnTrainTime = 3500;
+      this.spawnTrainTime = 4500;
       this.spawnTrainTimelapse = this.spawnTrainTime;
       // score
       this.total_trains = 0;
@@ -645,7 +645,7 @@
       await Promise.all(this.trains.map(async (train) => {
         await train.Draw(this.gameMap, move, ctx2);
       }));
-      if (this.score_window_yes) {
+      if (this.score_window_yes && move) {
         this.score_window.draw(ctx2, this.current_time, this.correct_trains, this.total_trains);
       }
     }
