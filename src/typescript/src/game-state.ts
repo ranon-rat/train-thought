@@ -56,9 +56,8 @@ export class GameState {
         })
     }
     async draw(ctx: CanvasRenderingContext2D, move: boolean) {
-        if (this.spawnTrainTimelapse <= 0) {
+        if (this.spawnTrainTimelapse <= 0 && move) {
             this.spawnTrain()
-
             this.spawnTrainTimelapse = this.spawnTrainTime
         }
         this.gameMap.Draw(ctx)
