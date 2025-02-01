@@ -75,7 +75,7 @@ export class GameState {
             await train.Draw(this.gameMap, move, ctx)
         }))
         // so we gotta draw the text of the score and shit
-        if (this.score_window_yes) {
+        if (this.score_window_yes && move) {
             this.score_window.draw(ctx, this.current_time, this.correct_trains, this.total_trains)
         }
     }
