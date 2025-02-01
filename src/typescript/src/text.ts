@@ -7,15 +7,16 @@ export class TextInterface {
     x: number = 0
     y: number = 0
     font_size: number = 0
-
+    font_family = "Arial"
     color: string
     content: string
 
-    constructor(x: number, y: number, font_size: number, content: string, color: string, font_family: string = "Arial", canvas: HTMLCanvasElement) {
+    constructor(x: number, y: number, font_size: number, content: string, color: string, font_family: string, canvas: HTMLCanvasElement) {
         this.original_x = x
         this.original_y = y
         this.original_font_size = font_size
         this.resize(canvas)
+        this.font_family = font_family ? font_family : this.font_family
         this.content = content
         this.color = color
 
@@ -30,7 +31,7 @@ export class TextInterface {
     }
     draw(ctx: CanvasRenderingContext2D) {
         ctx.fillStyle = this.color
-        ctx.font = `${this.font_size}px Arial`
+        ctx.font = `${this.font_size}px ${this.font_family}`
         ctx.textAlign = "center"
         ctx.fillText(this.content, this.x, this.y + this.font_size / 2)
     }

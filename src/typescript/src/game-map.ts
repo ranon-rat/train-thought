@@ -14,7 +14,6 @@ export class GameMap {
     level_directions: Direction[][]
     level_before: Direction[][]
     changing_rails_directions: Direction[][][]
-
     changing_rails_pos: number[][]
     houses_id: number[][] = []
     houses_length: number = 0
@@ -203,11 +202,8 @@ export class GameMap {
 
         }
 
-        this.DrawLine(direction_before.x, direction_before.y, direction_next.x2, direction_next.y2, ctx)
+        DrawLineColor(direction_before.x, direction_before.y, direction_next.x2, direction_next.y2, ctx, "rgb(255,255,255)", 15)
 
-    }
-    DrawLine(x1: number, y1: number, x2: number, y2: number, ctx: CanvasRenderingContext2D) {
-        DrawLineColor(x1, y1, x2, y2, ctx, "rgb(255,255,255)", 15)
     }
     resize(canvas: HTMLCanvasElement) {
         this.length = canvas.width / MAPS_WIDTH
@@ -221,7 +217,7 @@ export class GameMap {
         if (its_out_of_bounds(x_floor, y_floor, this.level_design)) return Kind.EMPTY
         return this.level_design[y_floor][x_floor]
     }
-    GetDirection(x: number, y: number) {
+    GetNext(x: number, y: number) {
         const y_floor = Math.floor(y)
         const x_floor = Math.floor(x)
         if (its_out_of_bounds(x_floor, y_floor, this.level_directions)) return Direction.NEUTRAL

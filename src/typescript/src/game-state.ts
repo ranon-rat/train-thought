@@ -4,22 +4,22 @@ import { Kind } from "./types-enum-constants";
 import { scoreWindow } from "./score-window";
 
 export class GameState {
-    score: number;
-    trains: Train[] = []
-    gameMap: GameMap
-    spawnTrainTime: number = 3500
-    spawnTrainTimelapse: number = this.spawnTrainTime
+    private trains: Train[] = []
+    private gameMap: GameMap
+
+    private readonly spawnTrainTime: number = 3500
+    private spawnTrainTimelapse: number = this.spawnTrainTime
+    // score
     total_trains: number = 0
     correct_trains: number = 0
-    score_window: scoreWindow
-    score_window_yes: boolean
-    private readonly initial_time: number = 1000 * 60 * 2// 2 minutes i guess that would be good 
 
+    private score_window: scoreWindow
+    private score_window_yes: boolean
+
+    private readonly initial_time: number = 1000 * 60 * 2// 2 minutes i guess that would be good 
     current_time: number = this.initial_time
 
-
     constructor(level: Kind[][], canvas: HTMLCanvasElement, score_window_yes: boolean = true) {
-        this.score = 0;
         this.gameMap = new GameMap(level)
         this.score_window_yes = score_window_yes
         this.score_window = new scoreWindow(canvas)
@@ -55,7 +55,7 @@ export class GameState {
             train.changeSpeed(deltaTime)
         })
     }
-    async draw(ctx: CanvasRenderingContext2D,) {
+    async draw(ctx: CanvasRenderingContext2D, move: boolean) {
         if (this.spawnTrainTimelapse <= 0) {
             this.spawnTrain()
 
@@ -72,7 +72,7 @@ export class GameState {
             return !train.ready
         })
         await Promise.all(this.trains.map(async (train) => {
-            await train.Draw(this.gameMap, ctx)
+            await train.Draw(this.gameMap, move, ctx)
         }))
         // so we gotta draw the text of the score and shit
         if (this.score_window_yes) {

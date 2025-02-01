@@ -9,7 +9,7 @@ window.addEventListener("resize", () => {
     game.windowResize(canvas)
 })
 canvas.addEventListener("click", (e) => {
-    game.click(e, canvas, ctx)
+    game.click(e, canvas)
 })
 window.addEventListener("keydown", (e) => {
     game.onKeyPress(e, canvas)

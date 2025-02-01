@@ -38,7 +38,7 @@ export class Train {
             [x_l, y_l] = [x_l - this.dX / 2, y_l - this.dY / 2]
         }
         const before = map.GetBefore(x_l, y_l)
-        let next = map.GetDirection(x_l, y_l)
+        let next = map.GetNext(x_l, y_l)
 
         let [dx, dy] = [0, 0]
         if (next === Direction.NEUTRAL) {
@@ -109,7 +109,7 @@ export class Train {
         return vectors[direction]
     }
 
-    async Draw(map: GameMap, ctx: CanvasRenderingContext2D) {
+    async Draw(map: GameMap, move: boolean, ctx: CanvasRenderingContext2D) {
         const point = map.GetPoint(this.x, this.y)
         const before = map.GetPoint(this.x - this.dX / 2, this.y - this.dY / 2)
         if (before === Kind.HOUSE || point === Kind.EMPTY) {
@@ -117,17 +117,20 @@ export class Train {
             this.ready = true
             return
         }
-        const [dx, dy] = this.Move(map, this.x, this.y)
-        // with this we correct the path if we go down a curve
-        // its necessary because the train its in a grid its not moving like if it was a 
-        // moving in an array(well kinda) but its not fixed and its constantly moving and so
-        // its important we correct the path
-        if (dx !== 0 || dy !== 0) {
-            this.x = dx === 0 ? Math.floor(this.x) + 0.5 : this.x
-            this.y = dy === 0 ? Math.floor(this.y) + 0.5 : this.y
+
+        if (move) {
+            const [dx, dy] = this.Move(map, this.x, this.y)
+            // with this we correct the path if we go down a curve
+            // its necessary because the train its in a grid its not moving like if it was a 
+            // moving in an array(well kinda) but its not fixed and its constantly moving and so
+            // its important we correct the path
+            if (dx !== 0 || dy !== 0) {
+                this.x = dx === 0 ? Math.floor(this.x) + 0.5 : this.x
+                this.y = dy === 0 ? Math.floor(this.y) + 0.5 : this.y
+            }
+            this.x += dx * this.velocity
+            this.y += dy * this.velocity
         }
-        this.x += dx * this.velocity
-        this.y += dy * this.velocity
         this.renderOrb(this.x * map.length, this.y * map.length, this.length, this.length, ctx)
     }
     renderOrb(x: number, y: number, width: number, height: number, ctx: CanvasRenderingContext2D) {

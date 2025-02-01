@@ -21,17 +21,17 @@ export class InitialMenu {
     onClick(x: number, y: number) {
         return this.play_button.isPressed(x, y);
     }
-    draw(ctx: CanvasRenderingContext2D) {
-        this.game_state.draw(ctx)
-        this.play_button.draw(ctx);
-
+    decreaseTime(deltaTime: number) {
+        this.game_state.decreaseTime(deltaTime)
     }
-    async updateSpeed(deltaTime: number) {
+    draw(ctx: CanvasRenderingContext2D) {
+        this.game_state.draw(ctx, true)
+        this.play_button.draw(ctx);
+    }
+    updateSpeed(deltaTime: number) {
         this.game_state.updateSpeed(deltaTime)
     }
-
     resize(canvas: HTMLCanvasElement) {
-
         this.game_state.resize(canvas)
         this.play_button.resize(canvas)
     }
