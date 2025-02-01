@@ -7,6 +7,7 @@ export class TextInterface {
     x: number = 0
     y: number = 0
     font_size: number = 0
+
     font_family = "Arial"
     color: string
     content: string

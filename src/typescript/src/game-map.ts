@@ -208,9 +208,7 @@ export class GameMap {
     resize(canvas: HTMLCanvasElement) {
         this.length = canvas.width / MAPS_WIDTH
     }
-    GetLength() {
-        return this.length
-    }
+
     GetPoint(x: number, y: number): Kind {
         const y_floor = Math.floor(y)
         const x_floor = Math.floor(x)

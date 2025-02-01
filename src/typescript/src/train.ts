@@ -23,7 +23,7 @@ export class Train {
     dY: number = 0
     length_ratio: number = 2.1
     constructor(x: number, y: number, map: GameMap, house_id: number) {
-        this.length = map.GetLength() / this.length_ratio
+        this.length = map.length / this.length_ratio
         this.y = (y + 0.5)
         this.x = (x + 0.5)
         this.house_id = house_id
@@ -46,7 +46,7 @@ export class Train {
         }
         if (this.rotatingDirection === Direction.NEUTRAL || point !== Kind.CHANGING_RAIL) {
 
-            // this is only for debugging, for now its better to avoid using it : )  console.log(this.printDirection(before), this.printDirection(next));
+            // delete comment when debugging console.log(this.printDirection(before), this.printDirection(next));
             this.rotatingDirection = next
         }
         next = this.rotatingDirection
@@ -131,9 +131,9 @@ export class Train {
             this.x += dx * this.velocity
             this.y += dy * this.velocity
         }
-        this.renderOrb(this.x * map.length, this.y * map.length, this.length, this.length, ctx)
+        this.renderOrb(this.x * map.length, this.y * map.length, this.length, ctx)
     }
-    renderOrb(x: number, y: number, width: number, height: number, ctx: CanvasRenderingContext2D) {
+    renderOrb(x: number, y: number, height: number, ctx: CanvasRenderingContext2D) {
         draw_circle(x, y, height / 2, ctx, COLORS[this.house_id], 20)
     }
 
