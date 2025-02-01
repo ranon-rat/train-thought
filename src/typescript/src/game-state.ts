@@ -7,7 +7,7 @@ export class GameState {
     private trains: Train[] = []
     private gameMap: GameMap
 
-    private readonly spawnTrainTime: number = 3500
+    private readonly spawnTrainTime: number = 4500
     private spawnTrainTimelapse: number = this.spawnTrainTime
     // score
     total_trains: number = 0
