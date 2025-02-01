@@ -51,14 +51,16 @@
 
   // src/typescript/src/text.ts
   var TextInterface = class {
-    constructor(x, y, font_size, content, color, font_family = "Arial", canvas2) {
+    constructor(x, y, font_size, content, color, font_family, canvas2) {
       this.x = 0;
       this.y = 0;
       this.font_size = 0;
+      this.font_family = "Arial";
       this.original_x = x;
       this.original_y = y;
       this.original_font_size = font_size;
       this.resize(canvas2);
+      this.font_family = font_family ? font_family : this.font_family;
       this.content = content;
       this.color = color;
     }
@@ -72,7 +74,7 @@
     }
     draw(ctx2) {
       ctx2.fillStyle = this.color;
-      ctx2.font = `${this.font_size}px Arial`;
+      ctx2.font = `${this.font_size}px ${this.font_family}`;
       ctx2.textAlign = "center";
       ctx2.fillText(this.content, this.x, this.y + this.font_size / 2);
     }
@@ -131,11 +133,11 @@
     "----------------------",
     "-RRRRRR-RRRRRRRRRRRRS-",
     "-R----R-R-------------",
-    "-RRRR-R-R-RRRRRR-RRR--",
-    "----R-R-R-R----R-R-R--",
-    "-RRRR-R-R-RRRR-R-R-R--",
-    "-R----R-R----R-R-R-R--",
-    "-RRRR-R-RRRRRR-R-R-R--",
+    "-RRRR-R-RRRRRRRR-RRR--",
+    "----R-R--------R-R-R--",
+    "-RRRR-R--------R-R-R--",
+    "-R----R--------R-R-R--",
+    "-RRRR-R--------R-R-R--",
     "----R-R--------RRR-R--",
     "-HRRR-RRRRRRRR-----R--",
     "-------------RRRRRRR--",
@@ -249,13 +251,13 @@
       this.dX = 0;
       this.dY = 0;
       this.length_ratio = 2.1;
-      this.length = map.GetLength() / this.length_ratio;
+      this.length = map.length / this.length_ratio;
       this.y = y + 0.5;
       this.x = x + 0.5;
       this.house_id = house_id;
     }
-    resize(length) {
-      this.length = length / this.length_ratio;
+    resize(canvas2) {
+      this.length = canvas2.height / (MAPS_WIDTH * this.length_ratio);
     }
     Move(map, x, y) {
       let [x_l, y_l] = [x, y];
@@ -264,13 +266,12 @@
         [x_l, y_l] = [x_l - this.dX / 2, y_l - this.dY / 2];
       }
       const before = map.GetBefore(x_l, y_l);
-      let next = map.GetDirection(x_l, y_l);
+      let next = map.GetNext(x_l, y_l);
       let [dx, dy] = [0, 0];
       if (next === 0 /* NEUTRAL */) {
         return [dx, dy];
       }
       if (this.rotatingDirection === 0 /* NEUTRAL */ || point !== 3 /* CHANGING_RAIL */) {
-        console.log(this.printDirection(before), this.printDirection(next));
         this.rotatingDirection = next;
       }
       next = this.rotatingDirection;
@@ -326,7 +327,7 @@
       };
       return vectors[direction];
     }
-    async Draw(map, ctx2) {
+    async Draw(map, move, ctx2) {
       const point = map.GetPoint(this.x, this.y);
       const before = map.GetPoint(this.x - this.dX / 2, this.y - this.dY / 2);
       if (before === 1 /* HOUSE */ || point === 0 /* EMPTY */) {
@@ -334,16 +335,18 @@
         this.ready = true;
         return;
       }
-      const [dx, dy] = this.Move(map, this.x, this.y);
-      if (dx !== 0 || dy !== 0) {
-        this.x = dx === 0 ? Math.floor(this.x) + 0.5 : this.x;
-        this.y = dy === 0 ? Math.floor(this.y) + 0.5 : this.y;
+      if (move) {
+        const [dx, dy] = this.Move(map, this.x, this.y);
+        if (dx !== 0 || dy !== 0) {
+          this.x = dx === 0 ? Math.floor(this.x) + 0.5 : this.x;
+          this.y = dy === 0 ? Math.floor(this.y) + 0.5 : this.y;
+        }
+        this.x += dx * this.velocity;
+        this.y += dy * this.velocity;
       }
-      this.x += dx * this.velocity;
-      this.y += dy * this.velocity;
-      this.renderOrb(this.x * map.length, this.y * map.length, this.length, this.length, ctx2);
+      this.renderOrb(this.x * map.length, this.y * map.length, this.length, ctx2);
     }
-    renderOrb(x, y, width, height, ctx2) {
+    renderOrb(x, y, height, ctx2) {
       draw_circle(x, y, height / 2, ctx2, COLORS[this.house_id], 20);
     }
     changeSpeed(time) {
@@ -511,16 +514,10 @@
         let direction_changing_rails = around.find((v) => v.v === c);
         DrawLineColor(direction_before.x, direction_before.y, direction_changing_rails.x2, direction_changing_rails.y2, ctx2, "rgba(255, 255, 255, 0.23)", 15);
       }
-      this.DrawLine(direction_before.x, direction_before.y, direction_next.x2, direction_next.y2, ctx2);
+      DrawLineColor(direction_before.x, direction_before.y, direction_next.x2, direction_next.y2, ctx2, "rgb(255,255,255)", 15);
     }
-    DrawLine(x1, y1, x2, y2, ctx2) {
-      DrawLineColor(x1, y1, x2, y2, ctx2, "rgb(255,255,255)", 15);
-    }
-    UpdateLength(length) {
-      this.length = length;
-    }
-    GetLength() {
-      return this.length;
+    resize(canvas2) {
+      this.length = canvas2.width / MAPS_WIDTH;
     }
     GetPoint(x, y) {
       const y_floor = Math.floor(y);
@@ -528,7 +525,7 @@
       if (its_out_of_bounds(x_floor, y_floor, this.level_design)) return 0 /* EMPTY */;
       return this.level_design[y_floor][x_floor];
     }
-    GetDirection(x, y) {
+    GetNext(x, y) {
       const y_floor = Math.floor(y);
       const x_floor = Math.floor(x);
       if (its_out_of_bounds(x_floor, y_floor, this.level_directions)) return 0 /* NEUTRAL */;
@@ -570,6 +567,7 @@
       this.y = this.original_y / MAX_HEIGHT * canvas2.height;
       this.width = this.original_width / MAX_WIDTH * canvas2.width;
       this.height = this.original_height / MAX_HEIGHT * canvas2.height;
+      this.text.resize(canvas2);
     }
     draw(ctx2, current_time, correct_trains, total_trains) {
       ctx2.fillStyle = "red";
@@ -589,21 +587,21 @@
       this.trains = [];
       this.spawnTrainTime = 3500;
       this.spawnTrainTimelapse = this.spawnTrainTime;
+      // score
       this.total_trains = 0;
       this.correct_trains = 0;
       this.initial_time = 1e3 * 60 * 2;
       // 2 minutes i guess that would be good 
       this.current_time = this.initial_time;
-      this.score = 0;
       this.gameMap = new GameMap(level);
       this.score_window_yes = score_window_yes;
       this.score_window = new scoreWindow(canvas2);
     }
-    resize(canvas2, dx) {
+    resize(canvas2) {
       this.score_window.resize(canvas2);
-      this.gameMap.UpdateLength(dx);
+      this.gameMap.resize(canvas2);
       this.trains.forEach((train) => {
-        train.resize(dx);
+        train.resize(canvas2);
       });
     }
     spawnTrain() {
@@ -629,7 +627,7 @@
         train.changeSpeed(deltaTime);
       });
     }
-    async draw(ctx2) {
+    async draw(ctx2, move) {
       if (this.spawnTrainTimelapse <= 0) {
         this.spawnTrain();
         this.spawnTrainTimelapse = this.spawnTrainTime;
@@ -645,7 +643,7 @@
         return !train.ready;
       });
       await Promise.all(this.trains.map(async (train) => {
-        await train.Draw(this.gameMap, ctx2);
+        await train.Draw(this.gameMap, move, ctx2);
       }));
       if (this.score_window_yes) {
         this.score_window.draw(ctx2, this.current_time, this.correct_trains, this.total_trains);
@@ -671,17 +669,18 @@
     onClick(x, y) {
       return this.play_button.isPressed(x, y);
     }
+    decreaseTime(deltaTime) {
+      this.game_state.decreaseTime(deltaTime);
+    }
     draw(ctx2) {
-      this.game_state.draw(ctx2);
+      this.game_state.draw(ctx2, true);
       this.play_button.draw(ctx2);
     }
-    async updateSpeed(deltaTime) {
+    updateSpeed(deltaTime) {
       this.game_state.updateSpeed(deltaTime);
     }
     resize(canvas2) {
-      const width = Math.min(MAX_WIDTH, window.innerWidth);
-      const dx = width / MAPS_WIDTH;
-      this.game_state.resize(canvas2, dx);
+      this.game_state.resize(canvas2);
       this.play_button.resize(canvas2);
     }
   };
@@ -701,8 +700,26 @@
         this.original_x + this.original_width / 2 - this.original_width / 4,
         this.original_y + this.original_height - 95,
         this.original_width / 2,
-        90,
+        70,
         "replay",
+        canvas2
+      );
+      this.gameOverText = new TextInterface(
+        this.original_x + this.original_width / 2,
+        this.original_y + 30,
+        80,
+        "Game Over",
+        "white",
+        "Arial",
+        canvas2
+      );
+      this.scoreBoard = new TextInterface(
+        MAX_WIDTH / 2,
+        MAX_HEIGHT / 2,
+        20,
+        "0 of 0",
+        "white",
+        "Arial",
         canvas2
       );
       this.resize(canvas2);
@@ -713,11 +730,9 @@
     draw(ctx2, correct_trains, total_trains) {
       ctx2.fillStyle = "rgb(0,0,0)";
       ctx2.fillRect(this.x, this.y, this.width, this.height);
-      ctx2.fillStyle = "rgb(255,255,255)";
-      ctx2.font = "80px Arial";
-      ctx2.fillText(`Game Over`, this.x + this.width / 2, this.y);
-      ctx2.font = "10px Arial";
-      ctx2.fillText(`${correct_trains} of ${total_trains}`, this.x + this.width / 2, this.y + this.height / 8 + 40);
+      this.gameOverText.draw(ctx2);
+      this.scoreBoard.update_text(`${correct_trains} of ${total_trains}`);
+      this.scoreBoard.draw(ctx2);
       this.gameOverButton.draw(ctx2);
     }
     resize(canvas2) {
@@ -725,6 +740,8 @@
       this.y = this.original_y / MAX_HEIGHT * canvas2.height;
       this.width = this.original_width / MAX_WIDTH * canvas2.width;
       this.height = this.original_height / MAX_HEIGHT * canvas2.height;
+      this.gameOverText.resize(canvas2);
+      this.scoreBoard.resize(canvas2);
       this.gameOverButton.resize(canvas2);
     }
   };
@@ -737,6 +754,7 @@
       this.FPS = 60;
       this.frameDelay = 1e3 / this.FPS;
       this.game_state = null;
+      // information
       this.correct_trains = 0;
       this.total_trains = 0;
       this.selection_menu = new SelectionMenu(canvas2);
@@ -746,58 +764,38 @@
     }
     onKeyPress(e, canvas2) {
       const key = e.key.toLowerCase();
-      if (key === "s") {
-        if (this.game_state) {
-          this.game_state.spawnTrain();
-        }
-      }
       if (key === "r") {
         this.state = 0;
-        this.game_state = null;
       }
       if (["q", "n"].includes(key)) {
         this.state = 3;
-        this.game_state = null;
       }
     }
     async draw(canvas2, ctx2) {
       const currentTime = performance.now();
       const deltaTime = currentTime - this.lastFrameTime;
-      if (this.state === 2 && this.game_state) {
-        this.game_state.decreaseTime(deltaTime);
-      }
+      this.game_state?.decreaseTime(deltaTime);
+      this.menu.decreaseTime(deltaTime);
       if (deltaTime >= this.frameDelay) {
+        ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
         switch (this.state) {
           case 0:
-            ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
-            this.menu.resize(canvas2);
+            this.menu.updateSpeed(deltaTime);
             this.menu.draw(ctx2);
             break;
           case 1:
-            this.selection_menu.resize(canvas2);
             this.selection_menu.draw(ctx2);
             break;
           case 2:
-            if (!this.game_state) {
-              break;
-            }
-            ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
-            const dx = canvas2.width / MAPS_WIDTH;
-            this.game_state.resize(canvas2, dx);
+            if (!this.game_state) break;
             this.game_state.updateSpeed(deltaTime);
-            this.game_state.draw(ctx2);
-            if (this.game_state.checkTime()) {
-              this.state = 3;
-            }
+            this.game_state.draw(ctx2, true);
+            if (this.game_state.checkTime()) this.state = 3;
             this.correct_trains = this.game_state.correct_trains;
             this.total_trains = this.game_state.total_trains;
             break;
           case 3:
-            if (this.game_state) {
-              this.game_state = null;
-              break;
-            }
-            this.game_over.resize(canvas2);
+            this.game_state?.draw(ctx2, false);
             this.game_over.draw(ctx2, this.correct_trains, this.total_trains);
             break;
         }
@@ -814,38 +812,32 @@
       this.selection_menu.resize(canvas2);
       this.game_over.resize(canvas2);
       if (this.game_state) {
-        this.game_state.resize(canvas2, dx);
+        this.game_state.resize(canvas2);
       }
     }
-    click(e, canvas2, ctx2) {
+    click(e, canvas2) {
       const rect = canvas2.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       switch (this.state) {
         case 0:
-          if (this.menu.onClick(x, y)) {
-            this.state = 1;
-            ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
-          }
+          if (!this.menu.onClick(x, y)) break;
+          this.state = 1;
           break;
         case 1:
           const level = this.selection_menu.onClick(x, y);
-          if (level) {
-            this.game_state = new GameState(level, canvas2);
-            this.windowResize(canvas2);
-            this.state = 2;
-            ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
-          }
+          if (!level) break;
+          this.game_state = new GameState(level, canvas2);
+          this.windowResize(canvas2);
+          this.state = 2;
           break;
         case 2:
           if (!this.game_state) break;
           this.game_state.onClick(x, y, canvas2.width, canvas2.height);
           break;
         case 3:
-          if (this.game_over.onClick(x, y)) {
-            this.state = 1;
-            ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
-          }
+          if (!this.game_over.onClick(x, y)) break;
+          this.state = 1;
           break;
         default:
           break;
@@ -864,7 +856,7 @@
     game.windowResize(canvas);
   });
   canvas.addEventListener("click", (e) => {
-    game.click(e, canvas, ctx);
+    game.click(e, canvas);
   });
   window.addEventListener("keydown", (e) => {
     game.onKeyPress(e, canvas);
