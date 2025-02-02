@@ -628,7 +628,7 @@
       });
     }
     async draw(ctx2, move) {
-      if (this.spawnTrainTimelapse <= 0) {
+      if (this.spawnTrainTimelapse <= 0 && move) {
         this.spawnTrain();
         this.spawnTrainTimelapse = this.spawnTrainTime;
       }
